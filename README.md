@@ -22,7 +22,7 @@ https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-July-20
 
 ## Author
 
-Jessie Han @2024, a UX designer and data visualization enthusiast, with a passion for using data to uncover stories and insights about urban life.
+Jessie Han @2024 and some help of our beloved GPTs.
 
 ## Process
 
