@@ -272,10 +272,12 @@ const SubwayRidership: React.FC = () => {
                 className="absolute top-[20vh] left-1/2 transform -translate-x-1/2"
                 style={{ width: canvasDimensions.height, height: canvasDimensions.height }}></canvas>
 
-            <header className="absolute top-0 left-0 w-full flex justify-between items-start p-4 font-instrument">
-                <div className="flex flex-col items-start space-y-2 max-w-[25vw] text-left"> {/* Set max width to 15vw */}
-                    <h1 className="text-white text-5xl">A "Rainy" Day in New York</h1>
-                    <h1 className="text-white text-2xl">Visualizing NYC Subway Ridership <br /> Amid Record Rainfall on September 29, 2023</h1>
+            <header className="absolute top-0 left-0 w-full flex justify-between items-start p-4 font-instrument text-left">
+                <div className="flex flex-col items-start space-y-2 max-w-[15vw]">
+                    <h1 className="text-white text-5xl">
+                        A <span className="font-extrabold">Rainy</span> Day in New York
+                    </h1>
+                    <h1 className="text-white text-2xl">Visualizing NYC Subway Ridership Amid Record Rainfall on September 29, 2023</h1>
                 </div>
                 <nav>
                     <a
