@@ -4,13 +4,15 @@ How did a single day of record rainfall bring one of the world's busiest transit
 
 https://mta-riderships.vercel.app/
 
-This ambient visualization provides an animated view of NYC MTA hourly ridership changes from September 28 to October 1, 2023, highlighting the effects of record rainfall and flooding.
+This ambient visualization provides an animated view of NYC MTA hourly ridership changes from September 28 to October 1, 2023.
 
 ## Snapshots of The Odyssey
 
-These two images from the visualization highlight ridership during rush hour at different stages of the event: one before the rainfall and the other after the flooding peak at 1 p.m. Explore the stark differences and see how a day of heavy rain reshaped the usual flow of commuters.
+These two images from the visualization highlight ridership during rush hour at different stages of the event: one before the rainfall:
 
 ![Image 1](https://github.com/JessieJessJe/mta-riderships/blob/cd1cd0abf9cf242afd7d748acd28da17d0ce13c7/src/assets/09281700.png)
+
+and the other after the flooding peak at 1 p.m.
 ![Image 2](https://github.com/JessieJessJe/mta-riderships/blob/cd1cd0abf9cf242afd7d748acd28da17d0ce13c7/src/assets/09291700.png)
 
 ## Data Source
@@ -20,7 +22,7 @@ https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-July-20
 
 ## Author
 
-This project was created by Jessie Han, a UX designer and data visualization enthusiast, with a passion for using data to uncover stories and insights about urban life.
+Jessie Han @2024, a UX designer and data visualization enthusiast, with a passion for using data to uncover stories and insights about urban life.
 
 ## Process
 
