@@ -239,7 +239,7 @@ const SubwayRidership: React.FC = () => {
 
                     return newIndex;
                 });
-            }, 1000); // Each combination lasts 1 second
+            }, 500); // Each combination lasts 1 second
         } else if (interval) {
             clearInterval(interval);
         }
