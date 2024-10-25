@@ -10,8 +10,8 @@ This ambient visualization provides an animated view of NYC MTA hourly ridership
 
 These two images from the visualization highlight ridership during rush hour at different stages of the event: one before the rainfall and the other after the flooding peak at 1 p.m. Explore the stark differences and see how a day of heavy rain reshaped the usual flow of commuters.
 
-![Image 1](assets/image1.png) <!-- Replace with the actual image file name -->
-![Image 2](assets/image2.png) <!-- Replace with the actual image
+![Image 1](https://github.com/JessieJessJe/mta-riderships/blob/cd1cd0abf9cf242afd7d748acd28da17d0ce13c7/src/assets/09281700.png)
+![Image 2](https://github.com/JessieJessJe/mta-riderships/blob/cd1cd0abf9cf242afd7d748acd28da17d0ce13c7/src/assets/09291700.png)
 
 ## Data Source
 
