@@ -39,7 +39,9 @@ const SubwayRidership: React.FC = () => {
     return { x, y };
   };
 
-
+  const maxRidership = Math.max(...typedData.map(s => s.total_ridership));
+//   const maxRidership = Math.max(...typedData.map(s => s.total_ridership));
+  const minRidership = Math.min(...typedData.map(s => s.total_ridership));
   // Draw data points on canvas based on the selected day and hour
   const drawOnCanvas = (ctx: CanvasRenderingContext2D, day: string, hour: string) => {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Clear the canvas
@@ -47,7 +49,7 @@ const SubwayRidership: React.FC = () => {
     // Define color variables
     const pink = '#C63CBC'; // Pink
     const orange = '#FF4500'; // Orange
-    const darkBlue = '#0A3777'; // Darker blue
+    const darkBlue = '#141233'; // Darker blue
     const black = '#000000'; // Black
 
     // Determine the background color based on the time of day
@@ -61,12 +63,11 @@ const SubwayRidership: React.FC = () => {
       gradient = ctx.createLinearGradient(0, canvasHeight, 0, canvasHeight - 200);
       gradient.addColorStop(0, interpolateColor(pink, orange, ratio)); // Pink to orange
       gradient.addColorStop(1, interpolateColor(black, darkBlue, ratio)); // Light blue
-    } else if (hourInt >= 7 && hourInt < 14) {
+    } else if (hourInt >= 7 && hourInt <= 14) {
       gradient = darkBlue;
     } else if (hourInt >= 15 && hourInt < 18) {
       gradient = darkBlue;
     } else if (hourInt >= 18 && hourInt < 20) {
-      // Sunset (6 PM to 8 PM)
       const ratio = (hourInt - 18) / 2; // Ratio from 0 to 1
       gradient = ctx.createLinearGradient(0, canvasHeight, 0, canvasHeight - 200);
       gradient.addColorStop(0, interpolateColor(orange, pink, ratio)); // Pink to orange
@@ -79,30 +80,50 @@ const SubwayRidership: React.FC = () => {
     }
 
     // Fill the canvas with the determined gradient
-
     ctx.fillStyle = gradient;
-
-
     ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Fill the canvas with the gradient
 
-    // Draw NYC outline first
-    //drawNYCOutline(ctx);
 
     // Draw subway stations
     typedData.forEach((station: StationData) => {
       if (station.transit_day === day && station.transit_hour === hour) {
         const { x, y } = scaleCoordinates(station.latitude, station.longitude);
 
-        // Scale brightness between 50% (0.5) to 100% (1.0)
-        const minBrightness = 0.2;
-        const maxBrightness = 1.0;
-        const brightness = minBrightness + (Math.min(1, station.total_ridership / 100) * (maxBrightness - minBrightness));
 
-        // Create a radial gradient for each station
-        const radius = 5; // Define the radius of the circle
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        gradient.addColorStop(0, `rgba(255, 255, 0, ${brightness})`); // Inner color (yellow with variable brightness)
-        gradient.addColorStop(1, `rgba(255, 255, 0, 0)`); // Outer color (fades out)
+        // Calculate Midpoint
+        const midpointRidership = (maxRidership - minRidership) / 3 + minRidership; // Calculate the midpoint of ridership
+
+        let brightness: number;
+        let radius: number;
+
+        let minRadius = 4;
+        let maxRadius = 8;
+
+        if (station.total_ridership <= midpointRidership) {
+            // Lower half of ridership
+            brightness = 1; // Set brightness to 0.5
+            const normalizedRidership = station.total_ridership / maxRidership; // Normalize based on the lower half
+            radius = minRadius + (normalizedRidership * (maxRadius - minRadius)); // Adjust radius based on normalized ridership
+
+            gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            gradient.addColorStop(0, getColorForRidership(station.total_ridership, midpointRidership, 1)); // Inner color based on ridership
+            gradient.addColorStop(0.5, getColorForRidership(station.total_ridership, midpointRidership, brightness)); // Inner color based on ridership
+            gradient.addColorStop(1, getColorForRidership(station.total_ridership, midpointRidership, brightness * 0.01)); // Light gray based on ridership
+    
+        } else {
+            // Upper half of ridership
+            const normalizedRidership = (station.total_ridership) / (maxRidership); // Normalize based on the upper half
+            brightness = 0.5 + (normalizedRidership * 0.5); // Change brightness from 0.5 to 1
+            radius = maxRadius; // Set radius to max
+
+           gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+           gradient.addColorStop(0, `rgba(255, 255, 255, 1)`); // Mid color (white with variable brightness)
+           gradient.addColorStop(0.5, `rgba(255, 255, 255, ${brightness})`); // Outer color (fades out to white)
+           gradient.addColorStop(1, `rgba(255, 255, 255, 0)`); // Outer color (transparent)
+        }
+
+        
+
 
         // Draw the circle with gradient
         ctx.beginPath();
@@ -125,6 +146,17 @@ const SubwayRidership: React.FC = () => {
   const hexToRgb = (hex: string) => {
     const bigint = parseInt(hex.replace(/^#/, ''), 16);
     return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+  };
+
+  // Function to determine color based on ridership
+  const getColorForRidership = (ridership: number, maxRidership: number, brightness:number) => {
+    // Normalize ridership to a value between 0 and 1
+    const normalizedRidership = Math.min(1, ridership / maxRidership);
+    
+    // Calculate RGB values based on normalized ridership
+    const grayValue = Math.round(50 + (205 * normalizedRidership)); // From 128 (gray) to 255 (white)
+    
+    return `rgba(${grayValue}, ${grayValue}, ${grayValue}, ${brightness})`; // Return gray color with variable brightness
   };
 
   // Get unique day-hour combinations
