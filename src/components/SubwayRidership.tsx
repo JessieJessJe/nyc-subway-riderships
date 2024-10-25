@@ -197,6 +197,8 @@ const SubwayRidership: React.FC = () => {
             const [day, hour] = combinations[0].split(' ');
             setCurrentTime({ day, hour });
         }
+
+        console.log('com', combinations)
     }, []);
 
     // Handle slider change
@@ -270,66 +272,11 @@ const SubwayRidership: React.FC = () => {
                 className="absolute top-[20vh] left-1/2 transform -translate-x-1/2"
                 style={{ width: canvasDimensions.height, height: canvasDimensions.height }}></canvas>
 
-            <div className="absolute top-0 left-0 p-4 w-full h-[20vh] text-center">
-                <p className="text-2xl text-white font-instrument">{currentTime.day} </p>
-                <p className="text-5xl font-bold text-white font-instrument">{currentTime.hour}</p>
-
-                <div className="w-full h-[40px] flex pt-0 items-center justify-center gap-4 ">
-                    <button
-                        className="px-2 py-2 w-[40px] h-[40px] bg-gray-100 text-black rounded hover:bg-white transition duration-200 flex items-center justify-center" // Added h-[40px] and justify-center
-                        onClick={toggleAnimation}>
-                        <i className={isAnimating ? 'fas fa-stop' : 'fas fa-play'}></i> {/* Icon changes based on animation state */}
-                    </button>
-                    <input
-                        type="range"
-                        min="0"
-                        max={dayHourCombinations.length - 1}
-                        value={sliderIndex}
-                        onChange={handleSliderChange}
-                        className="w-[80vh] appearance-none rounded-lg h-2 hover:bg-gray-300"
-                    />
-                    <style>
-                        {`
-                    input[type='range'] {
-                    -webkit-appearance: none; /* Remove default styling */
-                    appearance: none; /* Remove default styling */
-                    }
-
-                    input[type='range']::-webkit-slider-thumb {
-                    -webkit-appearance: none; /* Remove default styling */
-                    appearance: none; /* Remove default styling */
-                    width: 20px; /* Width of the thumb */
-                    height: 20px; /* Height of the thumb */
-                    border-radius: 50%; /* Make the thumb circular */
-                    background: white; /* Color of the thumb */
-                    cursor: pointer; /* Pointer cursor on hover */
-                    border: 2px solid #ccc; /* Optional border for the thumb */
-                    }
-
-                    input[type='range']::-moz-range-thumb {
-                    width: 20px; /* Width of the thumb */
-                    height: 20px; /* Height of the thumb */
-                    border-radius: 50%; /* Make the thumb circular */
-                    background: white; /* Color of the thumb */
-                    cursor: pointer; /* Pointer cursor on hover */
-                    border: 2px solid #ccc; /* Optional border for the thumb */
-                    }
-
-                    input[type='range']::-ms-thumb {
-                    width: 20px; /* Width of the thumb */
-                    height: 20px; /* Height of the thumb */
-                    border-radius: 50%; /* Make the thumb circular */
-                    cursor: pointer; /* Pointer cursor on hover */
-                    border: 2px solid #ccc; /* Optional border for the thumb */
-                    }
-                `}
-                    </style>
+            <header className="absolute top-0 left-0 w-full flex justify-between items-start p-4 font-instrument">
+                <div className="flex flex-col items-start space-y-2 max-w-[25vw] text-left"> {/* Set max width to 15vw */}
+                    <h1 className="text-white text-5xl">A "Rainy" Day in New York</h1>
+                    <h1 className="text-white text-2xl">Visualizing NYC Subway Ridership <br /> Amid Record Rainfall on September 29, 2023</h1>
                 </div>
-
-            </div>
-
-            <header className="absolute top-0 left-0 w-full flex justify-between items-center p-4 font-instrument">
-                <h1 className="text-white text-2xl ">Visualizing NYC Subway Hourly Ridership</h1>
                 <nav>
                     <a
                         href="https://github.com/yourusername" // Replace with your GitHub URL
@@ -340,9 +287,84 @@ const SubwayRidership: React.FC = () => {
                         About
                     </a>
                 </nav>
-            </header>
+            </header >
 
-        </div>
+            <div className="absolute top-0 left-0 p-4 w-full h-[20vh] text-center">
+                <p className="text-2xl text-white font-instrument">{currentTime.day} </p>
+                <p className="text-5xl font-bold text-white font-instrument">{currentTime.hour}</p>
+
+                <div className="w-full h-[40px] flex pt-0 items-center justify-center gap-4 ">
+                    <button
+                        className="px-2 py-2 w-[40px] h-[40px] bg-gray-100 text-black rounded hover:bg-white transition duration-200 flex items-center justify-center" // Added h-[40px] and justify-center
+                        onClick={toggleAnimation}>
+                        <i className={isAnimating ? 'fas fa-stop' : 'fas fa-play'}></i> {/* Icon changes based on animation state */}
+                    </button>
+                    <div className="relative">
+                        <input
+                            type="range"
+                            min="0"
+                            max={dayHourCombinations.length - 1}
+                            value={sliderIndex}
+                            onChange={handleSliderChange}
+                            className="w-[80vh] appearance-none rounded-lg h-2 hover:bg-gray-300"
+                        />
+                        {/* Single Triangle Mark */}
+                        <div className="absolute w-full top-0 flex justify-between">
+                            <div className="relative w-full">
+                                <span className="absolute top-6 text-s text-gray-300 hover:text-red-500 -translate-x-1/2">Intense Flooding</span>
+                                <div
+                                    className="absolute"
+                                    style={{
+                                        left: `${(37 / (dayHourCombinations.length - 1)) * 100}%`, // specificIndex should be calculated based on your day and hour
+                                        transform: 'translateX(-50%)', // Center the mark on the calculated position
+                                    }}
+                                >
+                                    <div className="w-1 h-6 bg-gray-300 hover:bg-red-500" /> {/* Adjust width and height as needed */}
+                                </div>
+                            </div>
+                        </div>
+                        <style>
+                            {`
+                                input[type='range'] {
+                                    -webkit-appearance: none; /* Remove default styling */
+                                    appearance: none; /* Remove default styling */
+                                }
+
+                                input[type='range']::-webkit-slider-thumb {
+                                    -webkit-appearance: none; /* Remove default styling */
+                                    appearance: none; /* Remove default styling */
+                                    width: 20px; /* Width of the thumb */
+                                    height: 20px; /* Height of the thumb */
+                                    border-radius: 50%; /* Make the thumb circular */
+                                    background: white; /* Color of the thumb */
+                                    cursor: pointer; /* Pointer cursor on hover */
+                                    border: 2px solid #ccc; /* Optional border for the thumb */
+                                }
+
+                                input[type='range']::-moz-range-thumb {
+                                    width: 20px; /* Width of the thumb */
+                                    height: 20px; /* Height of the thumb */
+                                    border-radius: 50%; /* Make the thumb circular */
+                                    background: white; /* Color of the thumb */
+                                    cursor: pointer; /* Pointer cursor on hover */
+                                    border: 2px solid #ccc; /* Optional border for the thumb */
+                                }
+
+                                input[type='range']::-ms-thumb {
+                                    width: 20px; /* Width of the thumb */
+                                    height: 20px; /* Height of the thumb */
+                                    border-radius: 50%; /* Make the thumb circular */
+                                    cursor: pointer; /* Pointer cursor on hover */
+                                    border: 2px solid #ccc; /* Optional border for the thumb */
+                                }
+                            `}
+                        </style>
+                    </div>
+                </div>
+
+            </div>
+
+        </div >
     );
 };
 
