@@ -17,18 +17,14 @@ These two images from the visualization highlight ridership during rush hour at 
 and the other after the flooding peak at 1 p.m.
 ![Image 2](https://github.com/JessieJessJe/mta-riderships/blob/91924443734f73af5a21aecb5b750455b16f3cd4/public/0929_1700.png)
 
-## Data Source
-
-The data used in this project is sourced from the Metropolitan Transportation Authority (MTA) and includes subway ridership statistics from September 28 to 30, 2023.
-https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-July-2020/wujg-7c2s/about_data
-
 ## Author
 
 Jessie Han @2024 and some help of our beloved GPTs.
 
-## Process
+## Data Source
 
-Data Collection: Subway ridership data was collected from the MTA's public dataset
+The data used in this project is sourced from the Metropolitan Transportation Authority (MTA) and includes subway ridership statistics from September 28 to 30, 2023.
+https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-July-2020/wujg-7c2s/about_data
 
 ```python
 import pandas as pd
@@ -96,5 +92,3 @@ with open(output_path, 'w') as f:
 print(f"Aggregated data saved to {output_path}")
 
 ```
-
-Visualization: Using tools like React and WebGL, the data was visualized to highlight the differences in subway ridership before, during, and after the intense rainfall. The focus was on comparing rush hour traffic on September 28 and September 30 to the disruptions caused by the flooding on September 29.
