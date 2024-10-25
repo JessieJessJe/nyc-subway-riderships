@@ -2,6 +2,8 @@
 
 How did a single day of record rainfall bring one of the world's busiest transit systems to its knees?
 
+![Preview](hhttps://github.com/JessieJessJe/mta-riderships/blob/fe23dae8e193953c57efd0158536eeadb68e52e2/public/app_preview.gif)
+
 https://mta-riderships.vercel.app/
 
 This ambient visualization provides an animated view of NYC MTA hourly ridership changes from September 28 to October 1, 2023.
