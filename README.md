@@ -1,10 +1,17 @@
 # A Rainy Day in New York
 
-## How did a single day of record rainfall bring one of the world's busiest transit systems to its knees?
+How did a single day of record rainfall bring one of the world's busiest transit systems to its knees?
 
-Explore how record rainfall on September 29, 2023, impacted New York City's subway ridership. This visualization project invites you to compare ridership during rush hours before the flooding began and after the intense rainfall on September 29.
+https://mta-riderships.vercel.app/
 
-By examining these patterns, you can see how severe weather reshaped travel behavior and disrupted the subway system, which faced major shutdowns, flooded stations, and delayed commutes. Check out the ridership differences to understand the profound impact of this significant weather event on one of the world's busiest transit networks.
+This ambient visualization provides an animated view of NYC MTA hourly ridership changes from September 28 to October 1, 2023, highlighting the effects of record rainfall and flooding.
+
+## Snapshots of The Odyssey
+
+These two images from the visualization highlight ridership during rush hour at different stages of the event: one before the rainfall and the other after the flooding peak at 1 p.m. Explore the stark differences and see how a day of heavy rain reshaped the usual flow of commuters.
+
+![Image 1](assets/image1.png) <!-- Replace with the actual image file name -->
+![Image 2](assets/image2.png) <!-- Replace with the actual image
 
 ## Data Source
 
