@@ -18,11 +18,13 @@ interface StationData {
 
 const SubwayRidership: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const bgRef = useRef<HTMLCanvasElement | null>(null);
+
     const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
 
     const updateCanvasDimensions = () => {
 
-        const height = window.innerHeight * 0.9; // 90% of viewport height
+        const height = window.innerHeight * 0.8; // 90% of viewport height
         const width = height; // 90% of viewport width
         setCanvasDimensions({ width, height });
     };
@@ -80,8 +82,10 @@ const SubwayRidership: React.FC = () => {
             // Sunrise (5 AM to 7 AM)
             const ratio = (hourInt - 5) / 2; // Ratio from 0 to 1
             gradient = ctx.createLinearGradient(0, canvasDimensions.height, 0, canvasDimensions.height - 100);
+
+
             gradient.addColorStop(0, interpolateColor(pink, orange, ratio)); // Pink to orange
-            gradient.addColorStop(1, interpolateColor(black, darkBlue, ratio)); // Light blue
+            gradient.addColorStop(1, interpolateColor(black, darkBlue, ratio)); // Black to dark blue
         } else if (hourInt >= 7 && hourInt <= 14) {
             gradient = darkBlue;
         } else if (hourInt >= 15 && hourInt < 18) {
@@ -89,20 +93,26 @@ const SubwayRidership: React.FC = () => {
         } else if (hourInt >= 18 && hourInt < 20) {
             const ratio = (hourInt - 18) / 2; // Ratio from 0 to 1
             gradient = ctx.createLinearGradient(0, canvasDimensions.height, 0, canvasDimensions.height - 100);
-            gradient.addColorStop(0, interpolateColor(orange, pink, ratio)); // Pink to orange
-            gradient.addColorStop(1, interpolateColor(darkBlue, black, ratio)); // Dark blue
+            gradient.addColorStop(0, interpolateColor(orange, pink, ratio)); // Orange to pink
+            gradient.addColorStop(1, interpolateColor(darkBlue, black, ratio)); // Dark blue to black
         } else if (hourInt >= 21 && hourInt < 24) {
             gradient = black;
-
         } else {
-            gradient = black; // From dark blue to light blue 
+            gradient = black; // Default color
         }
 
-        // Fill the canvas with the determined gradient
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvasDimensions.width, canvasDimensions.height); // Fill the canvas with the gradient
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-
+        // Fill the background canvas with the gradient
+        if (bgRef.current) {
+            const bgCtx = bgRef.current.getContext('2d');
+            if (bgCtx) {
+                bgCtx.clearRect(0, 0, window.innerWidth, window.innerHeight); // Clear the background canvas
+                bgCtx.fillStyle = gradient; // Set the fill style to the gradient
+                bgCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            }
+        }
         // Draw subway stations
         typedData.forEach((station: StationData) => {
             if (station.transit_day === day && station.transit_hour === hour) {
@@ -120,7 +130,7 @@ const SubwayRidership: React.FC = () => {
 
                 if (station.total_ridership <= midpointRidership) {
                     // Lower half of ridership
-                    brightness = 1; // Set brightness to 0.5
+                    brightness = 0.8; // Set brightness to 0.5
                     const normalizedRidership = station.total_ridership / maxRidership; // Normalize based on the lower half
                     radius = minRadius + (normalizedRidership * (maxRadius - minRadius)); // Adjust radius based on normalized ridership
 
@@ -132,7 +142,7 @@ const SubwayRidership: React.FC = () => {
                 } else {
                     // Upper half of ridership
                     const normalizedRidership = (station.total_ridership) / (maxRidership); // Normalize based on the upper half
-                    brightness = 0.5 + (normalizedRidership * 0.5); // Change brightness from 0.5 to 1
+                    brightness = 0.8 + (normalizedRidership * 0.2); // Change brightness from 0.5 to 1
                     radius = maxRadius; // Set radius to max
 
                     gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
@@ -140,9 +150,6 @@ const SubwayRidership: React.FC = () => {
                     gradient.addColorStop(0.5, `rgba(255, 255, 255, ${brightness})`); // Outer color (fades out to white)
                     gradient.addColorStop(1, `rgba(255, 255, 255, 0)`); // Outer color (transparent)
                 }
-
-
-
 
                 // Draw the circle with gradient
                 ctx.beginPath();
@@ -173,7 +180,7 @@ const SubwayRidership: React.FC = () => {
         const normalizedRidership = Math.min(1, ridership / maxRidership);
 
         // Calculate RGB values based on normalized ridership
-        const grayValue = Math.round(50 + (205 * normalizedRidership)); // From 128 (gray) to 255 (white)
+        const grayValue = Math.round(100 + (155 * normalizedRidership)); // From 128 (gray) to 255 (white)
 
         return `rgba(${grayValue}, ${grayValue}, ${grayValue}, ${brightness})`; // Return gray color with variable brightness
     };
@@ -254,28 +261,35 @@ const SubwayRidership: React.FC = () => {
     }, [currentTime, dayHourCombinations]);
 
     return (
-        <div>
+        <div className="absolute top-0 left-0 bg-black w-screen h-screen">
+            <canvas ref={bgRef}
+                className="absolute top-0 left-0 w-screen h-screen"></canvas>
             <canvas ref={canvasRef}
                 width={canvasDimensions.width}
                 height={canvasDimensions.height}
-                className="absolute top-0 left-1/2 transform -translate-x-1/2"
+                className="absolute top-[20vh] left-1/2 transform -translate-x-1/2"
                 style={{ width: canvasDimensions.height, height: canvasDimensions.height }}></canvas>
 
-            <div className="absolute top-0 left-0 w-full p-4">
-                <h1 className="text-3xl font text-white font-instrument">NYC Subway Ridership Data - Canvas with Sliding Scale and Animation</h1>
-                <p className="text-white font-instrument">Current Time: {currentTime.day} {currentTime.hour}</p>
-            </div>
-            <div className="absolute bottom-0 left-0 w-full h-[10vh] flex items-center justify-center bg-black p-4">
-                <input
-                    type="range"
-                    min="0"
-                    max={dayHourCombinations.length - 1}
-                    value={sliderIndex}
-                    onChange={handleSliderChange}
-                    className="w-[90vh] appearance-none rounded-lg h-2 hover:bg-gray-300"
-                />
-                <style>
-                    {`
+            <div className="absolute top-0 left-0 p-4 w-full h-[20vh] text-center">
+                <p className="text-2xl text-white font-instrument">{currentTime.day} </p>
+                <p className="text-5xl font-bold text-white font-instrument">{currentTime.hour}</p>
+
+                <div className="w-full h-[40px] flex pt-0 items-center justify-center gap-4 ">
+                    <button
+                        className="px-2 py-2 w-[40px] h-[40px] bg-gray-100 text-black rounded hover:bg-white transition duration-200 flex items-center justify-center" // Added h-[40px] and justify-center
+                        onClick={toggleAnimation}>
+                        <i className={isAnimating ? 'fas fa-stop' : 'fas fa-play'}></i> {/* Icon changes based on animation state */}
+                    </button>
+                    <input
+                        type="range"
+                        min="0"
+                        max={dayHourCombinations.length - 1}
+                        value={sliderIndex}
+                        onChange={handleSliderChange}
+                        className="w-[80vh] appearance-none rounded-lg h-2 hover:bg-gray-300"
+                    />
+                    <style>
+                        {`
                     input[type='range'] {
                     -webkit-appearance: none; /* Remove default styling */
                     appearance: none; /* Remove default styling */
@@ -309,14 +323,25 @@ const SubwayRidership: React.FC = () => {
                     border: 2px solid #ccc; /* Optional border for the thumb */
                     }
                 `}
-                </style>
+                    </style>
+                </div>
+
             </div>
 
-            <button
-                className="hover:bg-blue-600"
-                onClick={toggleAnimation}>
-                {isAnimating ? 'Stop Animation' : 'Start Animation'}
-            </button>
+            <header className="absolute top-0 left-0 w-full flex justify-between items-center p-4 font-instrument">
+                <h1 className="text-white text-2xl ">Visualizing NYC Subway Hourly Ridership</h1>
+                <nav>
+                    <a
+                        href="https://github.com/yourusername" // Replace with your GitHub URL
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white hover:underline text-2xl"
+                    >
+                        About
+                    </a>
+                </nav>
+            </header>
+
         </div>
     );
 };
