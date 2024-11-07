@@ -1,6 +1,6 @@
+import scaleCoordinates from './utils';
 import React, { useEffect, useState, useRef } from 'react';
 import data from '../assets/MTA_ridership_data.json'; // Import JSON data without type assertion
-// Ensure data is typed as an array of StationData
 const typedData: StationData[] = data as StationData[]; // Type assertion after import
 
 
@@ -21,21 +21,16 @@ const SubwayRidership: React.FC = () => {
     const bgRef = useRef<HTMLCanvasElement | null>(null);
 
     const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
-
+    // Function to update canvas dimensions based on viewport and max width
     const updateCanvasDimensions = () => {
-
-        const height = window.innerHeight * 0.8; // 90% of viewport height
-        const width = height; // 90% of viewport width
+        const width = Math.min(window.innerWidth, 1000); // Set width to 100% of viewport or max 1000px
+        const height = window.innerHeight * 0.8;          // 80% of viewport height
         setCanvasDimensions({ width, height });
     };
+
     useEffect(() => {
-        // Set initial dimensions
         updateCanvasDimensions();
-
-        // Update dimensions on window resize
         window.addEventListener('resize', updateCanvasDimensions);
-
-        // Cleanup event listener on component unmount
         return () => {
             window.removeEventListener('resize', updateCanvasDimensions);
         };
@@ -44,26 +39,12 @@ const SubwayRidership: React.FC = () => {
 
     const [currentTime, setCurrentTime] = useState<{ day: string, hour: string }>({ day: '', hour: '' });
     const [dayHourCombinations, setDayHourCombinations] = useState<string[]>([]);
-    const [sliderIndex, setSliderIndex] = useState(0); // Index for slider
-    const [isAnimating, setIsAnimating] = useState(false); // Animation state
-
-    // Scale lat/lon values to canvas coordinates
-    const scaleCoordinates = (latitude: number, longitude: number) => {
-        const latMin = 40.6; // Adjusted to move closer
-        const latMax = 40.9; // Adjusted to move closer
-        const lonMin = -74.2; // Adjusted to move closer
-        const lonMax = -73.8; // Adjusted to move closer
-
-        const x = ((longitude - lonMin) / (lonMax - lonMin)) * canvasDimensions.width;
-        const y = ((latMax - latitude) / (latMax - latMin)) * canvasDimensions.height;
-
-        return { x, y };
-    };
+    const [sliderIndex, setSliderIndex] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(true);
 
     const maxRidership = Math.max(...typedData.map(s => s.total_ridership));
-    //   const maxRidership = Math.max(...typedData.map(s => s.total_ridership));
     const minRidership = Math.min(...typedData.map(s => s.total_ridership));
-    // Draw data points on canvas based on the selected day and hour
+
     const drawOnCanvas = (ctx: CanvasRenderingContext2D, day: string, hour: string) => {
         ctx.clearRect(0, 0, canvasDimensions.width, canvasDimensions.height); // Clear the canvas
 
@@ -116,7 +97,7 @@ const SubwayRidership: React.FC = () => {
         // Draw subway stations
         typedData.forEach((station: StationData) => {
             if (station.transit_day === day && station.transit_hour === hour) {
-                const { x, y } = scaleCoordinates(station.latitude, station.longitude);
+                const { x, y } = scaleCoordinates(station.latitude, station.longitude, canvasDimensions);
 
 
                 // Calculate Midpoint
