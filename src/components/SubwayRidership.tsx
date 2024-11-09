@@ -113,8 +113,8 @@ const SubwayRidership: React.FC = () => {
     }, [currentTime, dayHourCombinations, drawOnCanvas]);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-black">
-            <div className="fixed top-0 left-0 w-full z-10">
+        <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-black">
+            <div className="fixed  top-0 left-0 w-[100vw] z-10">
                 <div className="flex justify-between items-start p-4 font-instrument text-left">
                     <div className="flex flex-col items-start space-y-2 w-[15vw]">
                         <h1 className="text-white text-lg md:text-2xl lg:text-4xl">
