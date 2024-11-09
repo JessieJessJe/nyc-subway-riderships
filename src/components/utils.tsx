@@ -5,7 +5,7 @@ export const scaleCoordinates = (
 ) => {
     const latMin = 40.6; // Northernmost latitude
     const latMax = 40.9; // Southernmost latitude
-    const lonMin = -74.2; // Westernmost longitude
+    const lonMin = -74.1; // Westernmost longitude
     const lonMax = -73.8; // Easternmost longitude
 
     // Calculate the range for latitude and longitude
