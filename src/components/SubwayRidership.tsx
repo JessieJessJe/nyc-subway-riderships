@@ -29,13 +29,14 @@ const SubwayRidership: React.FC = () => {
     const updateCanvasDimensions = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
+        setCanvasDimensions({ width, height });
 
         // If width is smaller than height, make the canvas a square with the height as the size
-        if (width < height) {
-            setCanvasDimensions({ width: height, height });
-        } else {
-            setCanvasDimensions({ width, height });
-        }
+        // if (width < height) {
+        //     setCanvasDimensions({ width: height, height });
+        // } else {
+        //     setCanvasDimensions({ width, height });
+        // }
     };
 
     useEffect(() => {

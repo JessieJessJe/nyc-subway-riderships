@@ -12,15 +12,17 @@ export const scaleCoordinates = (
     const latRange = latMax - latMin;
     const lonRange = lonMax - lonMin;
 
-    // Calculate the center offset for x
-    const centerLon = (lonMax + lonMin) / 2;
-    const centerX = ((centerLon - lonMin) / lonRange) * canvasDimensions.height;
+    // Determine the scaling factor and offset based on the smaller dimension
+    const scaleFactor = Math.min(canvasDimensions.width, canvasDimensions.height);
+    const isWidthBased = canvasDimensions.width < canvasDimensions.height;
 
     // Calculate the x and y coordinates based on the canvas dimensions
-    const x_raw = ((longitude - lonMin) / lonRange) * canvasDimensions.height;
-    const y = ((latMax - latitude) / latRange) * canvasDimensions.height;
+    const x_raw = ((longitude - lonMin) / lonRange) * scaleFactor;
+    const y_raw = ((latMax - latitude) / latRange) * scaleFactor;
 
-    const x = x_raw - centerX + canvasDimensions.width / 2;
+    // Apply offset based on the scaling dimension
+    const x = isWidthBased ? x_raw : x_raw + (canvasDimensions.width - scaleFactor) / 2;
+    const y = isWidthBased ? y_raw + (canvasDimensions.height - scaleFactor) / 2 : y_raw;
 
     return { x, y };
 };
