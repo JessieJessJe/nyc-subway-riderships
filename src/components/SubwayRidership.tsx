@@ -30,13 +30,6 @@ const SubwayRidership: React.FC = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
         setCanvasDimensions({ width, height });
-
-        // If width is smaller than height, make the canvas a square with the height as the size
-        // if (width < height) {
-        //     setCanvasDimensions({ width: height, height });
-        // } else {
-        //     setCanvasDimensions({ width, height });
-        // }
     };
 
     useEffect(() => {
@@ -118,10 +111,11 @@ const SubwayRidership: React.FC = () => {
             <div className="fixed  top-0 left-0 w-[100vw] z-10">
                 <div className="flex justify-between items-start p-4 font-instrument text-left">
                     <div className="flex flex-col items-start space-y-2 w-[15vw]">
-                        <h1 className="text-white text-lg md:text-2xl lg:text-4xl">
+                        <span className="inline sm:hidden">🗽 🚇</span>
+                        <h1 className="hidden sm:block text-white text-lg md:text-2xl lg:text-4xl">
                             A <span className="font-extrabold">Rainy</span> Day in New York
                         </h1>
-                        <h1 className="text-white text-base md:text-xl lg:text-2xl">
+                        <h1 className="hidden sm:block text-white text-base md:text-xl lg:text-2xl">
                             Visualizing NYC Subway Ridership Amid Record Rainfall on September 29, 2023
                         </h1>
                     </div>
@@ -143,9 +137,10 @@ const SubwayRidership: React.FC = () => {
                             href="https://github.com/JessieJessJe/mta-riderships"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-white hover:underline text-white text-base md:text-xl lg:text-2xl "
+                            className="text-white hover:underline text-base md:text-xl lg:text-2xl"
                         >
-                            About
+                            <span className="hidden sm:inline">About</span> {/* Show text on medium and larger screens */}
+                            <span className="inline sm:hidden">ℹ️</span>
                         </a>
                     </nav>
                 </div>
