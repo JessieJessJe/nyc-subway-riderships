@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import data from '../assets/MTA_ridership_data.json';
-import { useCanvasDrawing } from './useCanvasDrawing';
 import { StationData, CanvasDimensions, TimeState } from './type';
 import { TimeSlider } from './TimeSlider';
+import { useCanvasDrawing } from './useCanvasDrawing';
+import { scaleCoordinates } from './utils';
 
 const typedData: StationData[] = data as StationData[];
+
 
 const SubwayRidership: React.FC = () => {
     // Canvas refs and dimensions
@@ -22,8 +24,8 @@ const SubwayRidership: React.FC = () => {
     const minRidership = useMemo(() => Math.min(...typedData.map(s => s.total_ridership)), []);
     const midpointRidership = useMemo(() => (maxRidership - minRidership) / 3 + minRidership, [maxRidership, minRidership]);
 
-    // Get canvas drawing utilities
-    const { drawOnCanvas } = useCanvasDrawing(canvasDimensions, maxRidership, minRidership, midpointRidership);
+    // Use the custom hook for canvas drawing
+    const { drawOnCanvas } = useCanvasDrawing(canvasDimensions, maxRidership, minRidership, midpointRidership, typedData);
 
     // Canvas dimension management
     const updateCanvasDimensions = () => {
@@ -87,24 +89,20 @@ const SubwayRidership: React.FC = () => {
         };
     }, [isAnimating, dayHourCombinations]);
 
-    // Canvas drawing effect
+    // Combined canvas drawing and hover effect
     useEffect(() => {
-        if (dayHourCombinations.length > 0 && currentTime.day && currentTime.hour) {
-            const canvas = canvasRef.current;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-                if (ctx) {
-                    // Clear the canvas before drawing
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    // Draw background
-                    drawOnCanvas(ctx, null, currentTime.day, currentTime.hour, typedData);
-                }
-            }
-        }
-    }, [currentTime, dayHourCombinations, drawOnCanvas]);
+
+        // Draw on canvas using the custom hook
+        drawOnCanvas(ctx, null, currentTime.day, currentTime.hour);
+
+    }, [currentTime, canvasDimensions, drawOnCanvas]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-black">
@@ -113,10 +111,7 @@ const SubwayRidership: React.FC = () => {
                     <div className="flex flex-col items-start space-y-2 w-[15vw]">
                         <span className="inline sm:hidden">🗽 🚇</span>
                         <h1 className="hidden sm:block text-white text-lg md:text-2xl lg:text-4xl">
-                            A <span className="font-extrabold">Rainy</span> Day in New York
-                        </h1>
-                        <h1 className="hidden sm:block text-white text-base md:text-xl lg:text-2xl">
-                            Visualizing NYC Subway Ridership Amid Record Rainfall on September 29, 2023
+                            MTA Hourly Ridership
                         </h1>
                     </div>
                     <div className="flex-grow text-center w-[70vw]" >
@@ -150,7 +145,6 @@ const SubwayRidership: React.FC = () => {
                 width={canvasDimensions.width}
                 height={canvasDimensions.height}
                 className="relative"
-
             />
         </div>
     );

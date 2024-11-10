@@ -32,22 +32,6 @@ export const TimeSlider: React.FC<TimeSliderProps> = ({
                     onChange={onSliderChange}
                     className="w-[60vw] appearance-none rounded-lg h-2 hover:bg-gray-300"
                 />
-                <div className="absolute w-full top-0 flex justify-between">
-                    <div className="relative w-full">
-                        <span className="absolute top-6 text-xs md:text-base text-gray-300 hover:text-red-500 -translate-x-1/2">
-                            Intense Flooding
-                        </span>
-                        <div
-                            className="absolute"
-                            style={{
-                                left: `${(37 / (dayHourCombinations.length - 1)) * 100}%`,
-                                transform: 'translateX(-50%)',
-                            }}
-                        >
-                            <div className="w-1 h-6 bg-gray-300 hover:bg-red-500" />
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );
