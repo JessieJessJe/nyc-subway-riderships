@@ -11,7 +11,8 @@ export const useCanvasDrawing = (
   maxRidership: number,
   minRidership: number,
   midpointRidership: number,
-  typedData: StationData[]
+  typedData: StationData[],
+  tooltipRef: React.RefObject<HTMLDivElement>
 ) => {
   const [hoveredStation, setHoveredStation] = useState<StationData | null>(
     null
@@ -88,7 +89,7 @@ export const useCanvasDrawing = (
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
 
-        let foundStation = null;
+        let foundStation: StationData | null = null;
         const filteredData = typedData.filter(
           (station) =>
             station.transit_day === day && station.transit_hour === hour
@@ -102,12 +103,31 @@ export const useCanvasDrawing = (
           );
           const distance = Math.sqrt((x - mouseX) ** 2 + (y - mouseY) ** 2);
           if (distance < 8) {
-            // Assuming maxRadius is 8
             foundStation = station;
           }
         });
 
         setHoveredStation(foundStation);
+
+        const tooltip = tooltipRef.current;
+        if (hoveredStation && tooltip) {
+          tooltip.style.left = `${event.clientX + 10}px`;
+          tooltip.style.top = `${event.clientY + 10}px`;
+          tooltip.innerHTML = `
+            <div class="font-bold">${hoveredStation.station_complex}</div>
+            <div><span class="text-gray-800">${hoveredStation.transit_day} ${hoveredStation.transit_hour}</span></div>
+            <div class="pt-2">Approximately <span class="font-bold">${hoveredStation.total_ridership}</span> riders</div>
+          `;
+          tooltip.classList.remove("hidden");
+        } else if (tooltip) {
+          tooltip.classList.add("hidden");
+        }
+
+        if (foundStation) {
+          ctx.canvas.style.cursor = "pointer";
+        } else {
+          ctx.canvas.style.cursor = "default";
+        }
       };
 
       // Add mouse move event listener
@@ -174,23 +194,9 @@ export const useCanvasDrawing = (
           ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
           ctx.fillStyle = gradient;
           ctx.fill();
-
-          // Check if the mouse is over this station
-          if (hoveredStation && hoveredStation === station) {
-            // Draw tooltip
-            ctx.fillStyle = "white";
-            ctx.fillRect(x + 10, y - 10, 100, 30);
-            ctx.fillStyle = "black";
-            ctx.fillText(
-              `Ridership: ${station.total_ridership}`,
-              x + 15,
-              y + 5
-            );
-
-            console.log(station.total_ridership, "draw");
-          }
         }
       });
+
       return () => {
         canvas.removeEventListener("mousemove", handleMouseMove);
       };
@@ -202,6 +208,7 @@ export const useCanvasDrawing = (
       midpointRidership,
       hoveredStation,
       typedData,
+      tooltipRef,
     ]
   );
 

@@ -23,9 +23,10 @@ const SubwayRidership: React.FC = () => {
     const maxRidership = useMemo(() => Math.max(...typedData.map(s => s.total_ridership)), []);
     const minRidership = useMemo(() => Math.min(...typedData.map(s => s.total_ridership)), []);
     const midpointRidership = useMemo(() => (maxRidership - minRidership) / 3 + minRidership, [maxRidership, minRidership]);
+    const tooltipRef = useRef<HTMLDivElement | null>(null);
 
     // Use the custom hook for canvas drawing
-    const { drawOnCanvas } = useCanvasDrawing(canvasDimensions, maxRidership, minRidership, midpointRidership, typedData);
+    const { drawOnCanvas } = useCanvasDrawing(canvasDimensions, maxRidership, minRidership, midpointRidership, typedData, tooltipRef);
 
     // Canvas dimension management
     const updateCanvasDimensions = () => {
@@ -97,8 +98,6 @@ const SubwayRidership: React.FC = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-
-
         // Draw on canvas using the custom hook
         drawOnCanvas(ctx, null, currentTime.day, currentTime.hour);
 
@@ -146,6 +145,12 @@ const SubwayRidership: React.FC = () => {
                 height={canvasDimensions.height}
                 className="relative"
             />
+            <div
+                id="tooltip"
+                className="absolute bg-white text-black text-xl p-2 rounded shadow-lg hidden"
+                style={{ pointerEvents: 'none' }}
+                ref={tooltipRef}
+            ></div>
         </div>
     );
 };
