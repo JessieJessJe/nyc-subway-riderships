@@ -128,7 +128,7 @@ const SubwayRidership: React.FC = () => {
                     </div>
                     <nav className="text-right w-[15vw]">
                         <a
-                            href="https://github.com/JessieJessJe/mta-riderships"
+                            href="https://jessiehan.xyz/"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-white hover:underline text-base md:text-xl lg:text-2xl"
