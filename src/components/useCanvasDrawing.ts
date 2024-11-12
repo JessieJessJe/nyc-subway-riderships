@@ -29,7 +29,7 @@ export const useCanvasDrawing = (
 
       if (hourInt > 5 && hourInt <= 7) {
         const ratio = (hourInt - 5) / 2;
-        const gradient = ctx.createLinearGradient(
+        gradient = ctx.createLinearGradient(
           0,
           canvasDimensions.height,
           0,
