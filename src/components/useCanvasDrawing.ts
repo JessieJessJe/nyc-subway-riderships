@@ -149,51 +149,40 @@ export const useCanvasDrawing = (
           let radius: number;
           let gradient;
 
-          if (station.total_ridership <= midpointRidership) {
-            brightness = 0.8;
-            const normalizedRidership = station.total_ridership / maxRidership;
+          brightness = 1.0;
+          let cutoffRidership = 1000;
+
+          if (station.total_ridership >= cutoffRidership) {
+            radius = maxRadius * 0.8;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+            ctx.strokeStyle = "#EFEFEF";
+            ctx.stroke();
+          } else {
+            //radius based on ridership
+            const normalizedRidership =
+              station.total_ridership / cutoffRidership;
             radius = minRadius + normalizedRidership * (maxRadius - minRadius);
 
+            //soft edges for natural appearance
             gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
             gradient.addColorStop(
               0,
-              getColorForRidership(
-                station.total_ridership,
-                midpointRidership,
-                1
-              )
+              getColorForRidership(normalizedRidership, 1)
             );
             gradient.addColorStop(
               0.5,
-              getColorForRidership(
-                station.total_ridership,
-                midpointRidership,
-                brightness
-              )
+              getColorForRidership(normalizedRidership, brightness)
             );
             gradient.addColorStop(
               1,
-              getColorForRidership(
-                station.total_ridership,
-                midpointRidership,
-                brightness * 0.01
-              )
+              getColorForRidership(normalizedRidership, brightness * 0.01)
             );
-          } else {
-            const normalizedRidership = station.total_ridership / maxRidership;
-            brightness = 0.8 + normalizedRidership * 0.2;
-            radius = maxRadius;
-
-            gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-            gradient.addColorStop(0, `rgba(255, 255, 255, 1)`);
-            gradient.addColorStop(0.5, `rgba(255, 255, 255, ${brightness})`);
-            gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = gradient;
+            ctx.fill();
           }
-
-          ctx.beginPath();
-          ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-          ctx.fillStyle = gradient;
-          ctx.fill();
         }
       });
 

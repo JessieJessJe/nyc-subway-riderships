@@ -8,7 +8,7 @@ export const scaleCoordinates = (
     const lonMin = -74.1; // Westernmost longitude
     const lonMax = -73.7; // Easternmost longitude
 
-    // Calculate the range for latitude and longitude
+    // Calculate the range for latitude and longitudeR
     const latRange = latMax - latMin;
     const lonRange = lonMax - lonMin;
 
@@ -39,8 +39,17 @@ export const hexToRgb = (hex: string) => {
     return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
 };
 
-export const getColorForRidership = (ridership: number, maxRidership: number, brightness: number) => {
-    const normalizedRidership = Math.min(1, ridership / maxRidership);
-    const grayValue = Math.round(100 + (155 * normalizedRidership));
-    return `rgba(${grayValue}, ${grayValue}, ${grayValue}, ${brightness})`;
+// Function to interpolate between two colors
+const interpolateRainbowColor = (factor: number) => {
+    const dark = [128, 0, 128]; // RGB for yellow
+    const light = [255, 255, 0]; // RGB for yellow
+
+    const result = dark.map((c, i) => Math.round(c + factor * (light[i] - c)));
+    return `rgb(${result.join(',')})`;
+};
+
+
+export const getColorForRidership = (normalizedRidership: number, brightness: number) => {
+    const rgbColor = interpolateRainbowColor(normalizedRidership);
+    return `rgba(${rgbColor.slice(4, -1)}, ${brightness})`; // Assuming rgbColor is in the format 'rgb(r, g, b)'
 };
