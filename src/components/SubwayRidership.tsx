@@ -3,7 +3,7 @@ import data from '../assets/MTA_ridership_data.json';
 import { StationData, CanvasDimensions, TimeState } from './type';
 import { TimeSlider } from './TimeSlider';
 import { useCanvasDrawing } from './useCanvasDrawing';
-import { scaleCoordinates } from './utils';
+import RidershipHistogram from './RidershipHistogram'; // Import the new component
 
 const typedData: StationData[] = data as StationData[];
 
@@ -24,6 +24,8 @@ const SubwayRidership: React.FC = () => {
     const minRidership = useMemo(() => Math.min(...typedData.map(s => s.total_ridership)), []);
     const midpointRidership = useMemo(() => (maxRidership - minRidership) / 3 + minRidership, [maxRidership, minRidership]);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
+
+    console.log(maxRidership, minRidership, 'ridership')
 
     // Use the custom hook for canvas drawing
     const { drawOnCanvas } = useCanvasDrawing(canvasDimensions, maxRidership, minRidership, midpointRidership, typedData, tooltipRef);

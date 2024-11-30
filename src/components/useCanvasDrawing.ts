@@ -114,8 +114,8 @@ export const useCanvasDrawing = (
           let gradient;
 
           brightness = 1.0;
-          let upperCutoffRidership = 3000;
-          let lowerCutoffRidership = 20;
+          let upperCutoffRidership = 1000;
+          let lowerCutoffRidership = 10;
 
           if (station.total_ridership >= upperCutoffRidership) {
             radius = minRadius;
