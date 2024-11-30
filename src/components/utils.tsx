@@ -41,8 +41,9 @@ export const hexToRgb = (hex: string) => {
 
 // Function to interpolate between two colors
 const interpolateRainbowColor = (factor: number) => {
-    const dark = [128, 0, 128]; // RGB for yellow
-    const light = [255, 255, 0]; // RGB for yellow
+    // const dark = [255, 221, 255];
+    const dark = [231, 231, 231];
+    const light = [255, 0, 10];
 
     const result = dark.map((c, i) => Math.round(c + factor * (light[i] - c)));
     return `rgb(${result.join(',')})`;

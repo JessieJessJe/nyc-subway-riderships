@@ -20,42 +20,10 @@ export const useCanvasDrawing = (
 
   const calculateGradient = useCallback(
     (hourInt: number, ctx: CanvasRenderingContext2D) => {
-      const pink = "#C63CBC";
-      const orange = "#FF4500";
-      const darkBlue = "#141233";
       const black = "#000000";
 
       let gradient: string | CanvasGradient = black;
-
-      if (hourInt > 5 && hourInt <= 7) {
-        const ratio = (hourInt - 5) / 2;
-        gradient = ctx.createLinearGradient(
-          0,
-          canvasDimensions.height,
-          0,
-          canvasDimensions.height - 100
-        );
-        gradient.addColorStop(0, interpolateColor(pink, orange, ratio));
-        gradient.addColorStop(1, interpolateColor(black, darkBlue, ratio));
-      } else if (hourInt >= 7 && hourInt <= 14) {
-        gradient = darkBlue;
-      } else if (hourInt >= 15 && hourInt < 18) {
-        gradient = darkBlue;
-      } else if (hourInt >= 18 && hourInt < 20) {
-        const ratio = (hourInt - 18) / 2; // Ratio from 0 to 1
-        gradient = ctx.createLinearGradient(
-          0,
-          canvasDimensions.height,
-          0,
-          canvasDimensions.height - 100
-        );
-        gradient.addColorStop(0, interpolateColor(orange, pink, ratio)); // Orange to pink
-        gradient.addColorStop(1, interpolateColor(darkBlue, black, ratio)); // Dark blue to black
-      } else if (hourInt >= 21 && hourInt < 24) {
-        gradient = black;
-      } else {
-        gradient = black;
-      }
+      gradient = black;
       return gradient;
     },
     [canvasDimensions.height]
@@ -72,10 +40,6 @@ export const useCanvasDrawing = (
 
       const hourInt = parseInt(hour, 10);
       const gradient = calculateGradient(hourInt, ctx);
-
-      // Apply background gradient
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvasDimensions.width, canvasDimensions.height);
 
       // Update background canvas
       if (bgCtx) {
@@ -144,25 +108,69 @@ export const useCanvasDrawing = (
           );
 
           const minRadius = 4;
-          const maxRadius = 8;
+          const maxRadius = 10;
           let brightness: number;
           let radius: number;
           let gradient;
 
           brightness = 1.0;
-          let cutoffRidership = 1000;
+          let upperCutoffRidership = 3000;
+          let lowerCutoffRidership = 20;
 
-          if (station.total_ridership >= cutoffRidership) {
+          if (station.total_ridership >= upperCutoffRidership) {
+            radius = minRadius;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+
+            // Create a radial gradient for the fill
+            const fillGradient = ctx.createRadialGradient(
+              x,
+              y,
+              0,
+              x,
+              y,
+              radius
+            );
+            fillGradient.addColorStop(0, "#000000"); // Start color (center)
+            fillGradient.addColorStop(0.8, "#FF0000"); // Start color (center)
+            fillGradient.addColorStop(1, "#FF0000"); // End color (edge)
+            // Set the fill style to a solid color or gradient
+            ctx.fillStyle = fillGradient;
+            ctx.fill();
+
+            ctx.strokeStyle = "#ff0000";
+            ctx.stroke();
+          } else if (station.total_ridership <= lowerCutoffRidership) {
             radius = maxRadius * 0.8;
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-            ctx.strokeStyle = "#EFEFEF";
+
+            // Create a radial gradient for the fill
+            const fillGradient = ctx.createRadialGradient(
+              x,
+              y,
+              0,
+              x,
+              y,
+              radius
+            );
+            fillGradient.addColorStop(0, "#000000"); // Start color (center)
+            fillGradient.addColorStop(0.9, "#C1DD0A"); // Start color (center)
+            fillGradient.addColorStop(1, "#C1DD0A"); // End color (edge)
+
+            // Set the fill style to the radial gradient
+            ctx.fillStyle = fillGradient;
+            ctx.fill(); // Fill the circle
+
+            ctx.strokeStyle = "#C1DD0A";
             ctx.stroke();
           } else {
             //radius based on ridership
             const normalizedRidership =
-              station.total_ridership / cutoffRidership;
-            radius = minRadius + normalizedRidership * (maxRadius - minRadius);
+              station.total_ridership /
+              (upperCutoffRidership - lowerCutoffRidership);
+            radius =
+              maxRadius - normalizedRidership * (maxRadius - minRadius) + 1;
 
             //soft edges for natural appearance
             gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
@@ -171,7 +179,7 @@ export const useCanvasDrawing = (
               getColorForRidership(normalizedRidership, 1)
             );
             gradient.addColorStop(
-              0.5,
+              0.6,
               getColorForRidership(normalizedRidership, brightness)
             );
             gradient.addColorStop(
