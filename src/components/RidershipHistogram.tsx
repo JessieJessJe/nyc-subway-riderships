@@ -80,10 +80,14 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             { fill: 'black', stroke: 'white', strokeWidth: 1 },
             { fill: 'black', stroke: 'white', strokeWidth: 1 },
             { fill: 'black', stroke: 'white', strokeWidth: 1 },
-            { fill: 'url(#gradientMiddle)', stroke: 'none' },
-            { fill: 'url(#gradientMiddle)', stroke: 'none' },
-            { fill: 'url(#gradientMiddle)', stroke: 'none' },
-            { fill: 'url(#gradientMiddle)', stroke: 'none' },
+            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
+            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
+            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
+            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
+            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
+            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
+            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
+            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
             { fill: 'black', stroke: 'white', strokeWidth: 1 },
             { fill: 'black', stroke: 'white', strokeWidth: 1 },
             { fill: 'black', stroke: 'white', strokeWidth: 1 },
@@ -156,22 +160,10 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                     .attr('cy', '50%')
                     .attr('r', '50%');
 
-                if (i === 3) {  // Start of gradient
-                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#E7E7E7');
-                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#E7E7E7');
-                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#E7E7E7');
-                } else if (i === 4) {  // 1/3 through gradient
-                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#F1B1B3');
-                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#F1B1B3');
-                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#F1B1B3');
-                } else if (i === 5) {  // 2/3 through gradient
-                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#F77B7E');
-                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#F77B7E');
-                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#F77B7E');
-                } else if (i === 6) {  // End of gradient
-                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#FF000A');
-                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#FF000A');
-                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#FF000A');
+                if (i > 2 && i < 7) {  // Start of gradient
+                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#C8C8C8');
+                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#C8C8C8');
+                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#C8C8C8');
                 } else if (i <= 2) {  // First three bins
                     radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#000000');
                     radialGradient.append('stop').attr('offset', '90%').attr('stop-color', '#C1DD0A');
@@ -192,11 +184,7 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                     .attr('stroke', d => {
                         if (i <= 2) return '#C1DD0A';  // First three bins
                         if (i >= 7) return '#FF0000';  // Last two bins
-                        if (i === 3) return '#E7E7E7';
-                        if (i === 4) return '#F1B1B3';
-                        if (i === 5) return '#F77B7E';
-                        if (i === 6) return '#FF000A';
-                        return 'white';
+                        return '#C8C8C8';
                     })
                     .attr('stroke-width', 1);
             });

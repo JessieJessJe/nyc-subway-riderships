@@ -114,8 +114,8 @@ export const useCanvasDrawing = (
           let gradient;
 
           brightness = 1.0;
-          let upperCutoffRidership = 1000;
-          let lowerCutoffRidership = 10;
+          let upperCutoffRidership = 1122.02;
+          let lowerCutoffRidership = 19.95;
 
           if (station.total_ridership >= upperCutoffRidership) {
             radius = minRadius;
@@ -155,8 +155,8 @@ export const useCanvasDrawing = (
               radius
             );
             fillGradient.addColorStop(0, "#000000"); // Start color (center)
-            fillGradient.addColorStop(0.9, "#C1DD0A"); // Start color (center)
-            fillGradient.addColorStop(1, "#C1DD0A"); // End color (edge)
+            fillGradient.addColorStop(0.9, "#C1DD0A"); // #C1DD0A
+            fillGradient.addColorStop(1, "#C1DD0A"); // #C1DD0A
 
             // Set the fill style to the radial gradient
             ctx.fillStyle = fillGradient;
@@ -165,25 +165,29 @@ export const useCanvasDrawing = (
             ctx.strokeStyle = "#C1DD0A";
             ctx.stroke();
           } else {
-            //radius based on ridership
-            const normalizedRidership =
-              station.total_ridership /
-              (upperCutoffRidership - lowerCutoffRidership);
-            radius = maxRadius - normalizedRidership * (maxRadius - minRadius);
+            // Convert to logarithmic scale for radius calculation
+            const logMin = Math.log(lowerCutoffRidership);
+            const logMax = Math.log(upperCutoffRidership);
+            const logValue = Math.log(station.total_ridership);
+            const logNormalizedRidership =
+              (logValue - logMin) / (logMax - logMin);
+
+            radius =
+              maxRadius - logNormalizedRidership * (maxRadius - minRadius);
 
             //soft edges for natural appearance
             gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
             gradient.addColorStop(
               0,
-              getColorForRidership(normalizedRidership, 1)
+              getColorForRidership(logNormalizedRidership, 1)
             );
             gradient.addColorStop(
               0.9,
-              getColorForRidership(normalizedRidership, brightness)
+              getColorForRidership(logNormalizedRidership, brightness)
             );
             gradient.addColorStop(
               1,
-              getColorForRidership(normalizedRidership, brightness * 0.01)
+              getColorForRidership(logNormalizedRidership, brightness * 0.01)
             );
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI, false);

@@ -39,16 +39,15 @@ export const hexToRgb = (hex: string) => {
     return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
 };
 
-// Function to interpolate between two colors
+// Function to interpolate between two colors on a log scale
 const interpolateRainbowColor = (factor: number) => {
-    // const dark = [255, 221, 255];
-    const dark = [231, 231, 231];
-    const light = [255, 0, 10];
+    const dark = [200, 200, 200];
+    const light = [200, 200, 200];
 
+    // Use factor directly since it's already logarithmically scaled
     const result = dark.map((c, i) => Math.round(c + factor * (light[i] - c)));
     return `rgb(${result.join(',')})`;
 };
-
 
 export const getColorForRidership = (normalizedRidership: number, brightness: number) => {
     const rgbColor = interpolateRainbowColor(normalizedRidership);
