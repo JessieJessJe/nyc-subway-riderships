@@ -122,7 +122,7 @@ const SubwayRidership: React.FC = () => {
                     <div className="flex flex-col items-start space-y-2 w-[15vw]">
                         <span className="inline sm:hidden">🗽 🚇</span>
                         <h1 className="hidden sm:block text-white text-lg md:text-2xl lg:text-4xl">
-                            MTA Hourly Ridership
+                            How <b className="text-[#C1DD0A]">Empty</b> is Your Station?
                         </h1>
                     </div>
                     <div className="flex-grow text-center w-[70vw]" >
@@ -157,7 +157,7 @@ const SubwayRidership: React.FC = () => {
                 height={canvasDimensions.height}
                 className="relative"
             />
-            <div className="absolute top-48 left-8 z-20 border border-white rounded-lg p-4">
+            <div className="absolute top-48 left-4 z-20 border border-gray-500 p-4">
                 <RidershipHistogram
                     data={typedData}
                     width={600}
