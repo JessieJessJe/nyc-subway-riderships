@@ -53,3 +53,20 @@ export const getColorForRidership = (normalizedRidership: number, brightness: nu
     const rgbColor = interpolateRainbowColor(normalizedRidership);
     return `rgba(${rgbColor.slice(4, -1)}, ${brightness})`; // Assuming rgbColor is in the format 'rgb(r, g, b)'
 };
+
+export const logBins = [1, 2.69, 7.24, 19.95, 54.55, 149.54, 409.49, 1122.02, 3073.8, 8421.87, 20000];
+
+export const binStyles = [
+    { fill: '#C1DD0A', stroke: '#C1DD0A', strokeWidth: 1 },
+    { fill: '#C1DD0A', stroke: '#C1DD0A', strokeWidth: 1 },
+    { fill: '#C1DD0A', stroke: '#C1DD0A', strokeWidth: 1 },
+    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
+    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
+    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
+    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
+    { fill: '#FF000a', stroke: '#FF000a', strokeWidth: 1 },
+    { fill: '#FF000a', stroke: '#FF000a', strokeWidth: 1 },
+    { fill: '#FF000a', stroke: '#FF000a', strokeWidth: 1 },
+];
+
+export const tooltipContent = 'This histogram uses logarithmic binning to show station ridership distribution. The x-axis uses a log scale with custom bins to highlight different traffic patterns. Green indicates low traffic, gray shows medium traffic, and red represents high-traffic stations.';

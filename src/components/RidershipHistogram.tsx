@@ -1,30 +1,35 @@
 // MTAOpenData/front-end/src/components/RidershipHistogram.tsx
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
+import { logBins, binStyles, tooltipContent } from './utils';
 
 interface RidershipHistogramProps {
     data: { total_ridership: number }[];
     width: number;
     height: number;
+    currentData: { total_ridership: number }[];
 }
 
-const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, height }) => {
+const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, height, currentData }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
 
     useEffect(() => {
         if (!svgRef.current) return;
 
-        // Define custom log bins
-        const logBins = [1, 2.69, 7.24, 19.95, 54.55, 149.54, 409.49, 1122.02, 3073.8, 8421.87, 20000];
-
-        // Create ridership buckets with custom bins
+        // Create ridership buckets for all data
         const buckets = d3.bin()
             .domain([logBins[0], logBins[logBins.length - 1]])
             .thresholds(logBins.slice(1, -1))
             (data.map(d => d.total_ridership));
 
+        // Create separate buckets for current data
+        const currentBuckets = d3.bin()
+            .domain([logBins[0], logBins[logBins.length - 1]])
+            .thresholds(logBins.slice(1, -1))
+            (currentData.map(d => d.total_ridership));
+
         // Add margins for labels
-        const margin = { top: 40, right: 20, bottom: 150, left: 60 };
+        const margin = { top: 40, right: 60, bottom: 150, left: 60 };
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
 
@@ -75,24 +80,6 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             .attr('offset', '100%')
             .attr('stop-color', '#FF000A')  // [255, 0, 10]
 
-        // Define custom styles for each bin
-        const binStyles = [
-            { fill: 'black', stroke: 'white', strokeWidth: 1 },
-            { fill: 'black', stroke: 'white', strokeWidth: 1 },
-            { fill: 'black', stroke: 'white', strokeWidth: 1 },
-            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
-            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
-            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
-            { fill: '#C8C8C8', stroke: 'white', strokeWidth: 1 },
-            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
-            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
-            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
-            // { fill: 'url(#gradientMiddle)', stroke: 'none' },
-            { fill: 'black', stroke: 'white', strokeWidth: 1 },
-            { fill: 'black', stroke: 'white', strokeWidth: 1 },
-            { fill: 'black', stroke: 'white', strokeWidth: 1 },
-        ];
-
         // Add bars with custom styles
         g.selectAll('.bar')
             .data(buckets)
@@ -105,9 +92,9 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                 return Math.max(0, width - 8);  // Subtract 8px for gap, ensure width isn't negative
             })
             .attr('height', d => innerHeight - y(d.length))
-            .attr('fill', (_, i) => binStyles[i].fill)
-            .attr('stroke', (_, i) => binStyles[i].stroke)
-            .attr('stroke-width', (_, i) => binStyles[i].strokeWidth || 0);
+            .attr('fill', 'black')
+            .attr('stroke', 'white')
+            .attr('stroke-width', 1);
 
         // Add x-axis
         g.append('g')
@@ -178,7 +165,7 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                 g.append('circle')
                     .attr('class', 'bin-circle')
                     .attr('cx', x(d))
-                    .attr('cy', innerHeight + 50)
+                    .attr('cy', innerHeight + 120)
                     .attr('r', radius)
                     .attr('fill', `url(#${circleId})`)
                     .attr('stroke', d => {
@@ -197,11 +184,28 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             .attr('class', 'tick-line')
             .attr('x1', d => x(d))
             .attr('x2', d => x(d))
-            .attr('y1', innerHeight + 50)  // Start from where circles are centered
-            .attr('y2', innerHeight + 150)  // Extend down
+            .attr('y1', innerHeight + 60)
+            .attr('y2', innerHeight + 150)
             .attr('stroke', 'white')
             .attr('stroke-width', 1)
-            .attr('stroke-dasharray', '4,4');  // All lines are dashed
+            .attr('stroke-dasharray', '4,4');
+
+        // Add labels above tick lines
+        g.selectAll('.tick-label')
+            .data([
+                { value: 0, label: "0" },
+                { value: 19.95, label: "20" },
+                { value: 1122.02, label: "1,000" },
+                { value: 20000, label: "20,000" }
+            ])
+            .enter()
+            .append('text')
+            .attr('class', 'tick-label')
+            .attr('x', d => x(d.value))
+            .attr('y', innerHeight + 50)  // Position above the tick line
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#EFEFEF')
+            .text(d => d.label);
 
         // Add y-axis
         g.append('g')
@@ -216,15 +220,86 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             .attr('fill', 'white')
             .text('# of Stations');
 
-        // Add title
-        g.append('text')
-            .attr('x', innerWidth / 2)
-            .attr('y', -15)
+        // Add title group
+        const titleGroup = g.append('g')
+            .attr('transform', `translate(${innerWidth / 2}, -15)`);
+
+        // Add main title
+        titleGroup.append('text')
             .attr('text-anchor', 'middle')
             .attr('fill', 'white')
-            .text('Distribution of Station Ridership (per station per hour)');
+            .text('Distribution of Station Ridership');
 
-    }, [data, width, height]);
+        // Add tooltip icon
+        const tooltipIcon = titleGroup.append('text')
+            .attr('x', 250)
+            .attr('y', 0)
+            .attr('class', 'tooltip-icon transition-opacity duration-200')
+            .attr('fill', 'white')
+            .attr('cursor', 'pointer')
+            .text('Info ⓘ')  // Option 1: Filled info symbol
+            // .text('🛈')  // Option 2: Alternative filled info symbol
+            .style('font-size', '16px');
+
+        // Create HTML tooltip div
+        const tooltip = d3.select('body')
+            .append('div')
+            .attr('class', `
+                hidden
+                absolute
+                bg-gray-100
+                p-3
+                rounded-lg
+                shadow-lg
+                max-w-[300px]
+                z-50
+                text-gray-800
+                text-sm
+                leading-relaxed
+            `.trim())
+            .html(tooltipContent);
+
+        // Modify tooltip icon click handler
+        tooltipIcon.on('click', (event) => {
+            const iconPosition = (event.target as SVGElement).getBoundingClientRect();
+
+            if (tooltip.classed('hidden')) {
+                tooltip
+                    .classed('hidden', false)
+                    .style('left', `${iconPosition.right + -20}px`)
+                    .style('top', `${iconPosition.top}px`);
+                tooltipIcon.text('✕');  // Change to close icon
+            } else {
+                tooltip.classed('hidden', true);
+                tooltipIcon.text('Info ⓘ');  // Change back to info icon
+            }
+        });
+
+        // Clean up on component unmount
+
+
+        // After drawing the main bars, add bars for current selection
+        g.selectAll('.current-bar')
+            .data(currentBuckets)
+            .enter().append('rect')
+            .attr('class', 'current-bar')
+            .attr('x', d => x(d.x0 ?? logBins[0]))
+            .attr('y', d => y(d.length))
+            .attr('width', d => {
+                const width = x(d.x1 ?? logBins[logBins.length - 1]) - x(d.x0 ?? logBins[0]);
+                return Math.max(0, width - 8);
+            })
+            .attr('height', d => innerHeight - y(d.length))
+            .attr('fill', (_, i) => binStyles[i].fill)
+            .attr('stroke', (_, i) => binStyles[i].stroke)
+            .attr('stroke-width', (_, i) => binStyles[i].strokeWidth || 0);
+
+        return () => {
+            tooltip.remove();
+        };
+
+
+    }, [data, width, height, currentData]);
 
     return <svg ref={svgRef}></svg>;
 };

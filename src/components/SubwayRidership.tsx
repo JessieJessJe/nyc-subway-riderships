@@ -1,9 +1,16 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import data from '../assets/MTA_ridership_data.json';
+import rawData from '../assets/MTA_ridership_data.json';
 import { StationData, CanvasDimensions, TimeState } from './type';
 import { TimeSlider } from './TimeSlider';
 import { useCanvasDrawing } from './useCanvasDrawing';
 import RidershipHistogram from './RidershipHistogram'; // Import the new component
+
+interface RawDataEntry {
+    transit_day: string;
+    [key: string]: any;  // for other properties
+}
+
+const data = (rawData as RawDataEntry[]).filter(entry => entry.transit_day === "2023-09-28");
 
 const typedData: StationData[] = data as StationData[];
 
@@ -25,15 +32,18 @@ const SubwayRidership: React.FC = () => {
     const midpointRidership = useMemo(() => (maxRidership - minRidership) / 3 + minRidership, [maxRidership, minRidership]);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
 
-    console.log(maxRidership, minRidership, 'ridership')
-
     // Use the custom hook for canvas drawing
     const { drawOnCanvas } = useCanvasDrawing(canvasDimensions, maxRidership, minRidership, midpointRidership, typedData, tooltipRef);
 
     // Canvas dimension management
     const updateCanvasDimensions = () => {
+        const headerElement = document.querySelector('.header-container');
+        const headerHeight = headerElement?.getBoundingClientRect().height || 0;
+
         const width = window.innerWidth;
-        const height = window.innerHeight;
+        const height = window.innerHeight - headerHeight;
+
+        console.log(headerHeight, 'headerHeight', height, 'height')
         setCanvasDimensions({ width, height });
     };
 
@@ -107,7 +117,7 @@ const SubwayRidership: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-black">
-            <div className="fixed  top-0 left-0 w-[100vw] z-10">
+            <div className="header-container relative  top-0 left-0 w-[100vw] z-10">
                 <div className="flex justify-between items-start p-4 font-instrument text-left">
                     <div className="flex flex-col items-start space-y-2 w-[15vw]">
                         <span className="inline sm:hidden">🗽 🚇</span>
@@ -152,6 +162,10 @@ const SubwayRidership: React.FC = () => {
                     data={typedData}
                     width={600}
                     height={400}
+                    currentData={typedData.filter(
+                        station => station.transit_day === currentTime.day &&
+                            station.transit_hour === currentTime.hour
+                    )}
                 />
             </div>
             <div
