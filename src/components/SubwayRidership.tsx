@@ -147,6 +147,13 @@ const SubwayRidership: React.FC = () => {
                 height={canvasDimensions.height}
                 className="relative"
             />
+            <div className="absolute top-48 left-8 z-20 border border-white rounded-lg p-4">
+                <RidershipHistogram
+                    data={typedData}
+                    width={600}
+                    height={400}
+                />
+            </div>
             <div
                 id="tooltip"
                 className="absolute bg-white text-black text-xl p-2 rounded shadow-lg hidden"

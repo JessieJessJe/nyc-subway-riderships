@@ -108,7 +108,7 @@ export const useCanvasDrawing = (
           );
 
           const minRadius = 4;
-          const maxRadius = 10;
+          const maxRadius = 8;
           let brightness: number;
           let radius: number;
           let gradient;
@@ -141,7 +141,7 @@ export const useCanvasDrawing = (
             ctx.strokeStyle = "#ff0000";
             ctx.stroke();
           } else if (station.total_ridership <= lowerCutoffRidership) {
-            radius = maxRadius * 0.8;
+            radius = maxRadius;
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
 
@@ -169,8 +169,7 @@ export const useCanvasDrawing = (
             const normalizedRidership =
               station.total_ridership /
               (upperCutoffRidership - lowerCutoffRidership);
-            radius =
-              maxRadius - normalizedRidership * (maxRadius - minRadius) + 1;
+            radius = maxRadius - normalizedRidership * (maxRadius - minRadius);
 
             //soft edges for natural appearance
             gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
@@ -179,7 +178,7 @@ export const useCanvasDrawing = (
               getColorForRidership(normalizedRidership, 1)
             );
             gradient.addColorStop(
-              0.6,
+              0.9,
               getColorForRidership(normalizedRidership, brightness)
             );
             gradient.addColorStop(
