@@ -40,9 +40,9 @@ export const hexToRgb = (hex: string) => {
 };
 
 // Function to interpolate between two colors on a log scale
-const interpolateRainbowColor = (factor: number) => {
+export const interpolateRainbowColor = (factor: number) => {
     const dark = [200, 200, 200];
-    const light = [200, 200, 200];
+    const light = [255, 7, 0];
 
     // Use factor directly since it's already logarithmically scaled
     const result = dark.map((c, i) => Math.round(c + factor * (light[i] - c)));
@@ -60,10 +60,10 @@ export const binStyles = [
     { fill: '#C1DD0A', stroke: '#C1DD0A', strokeWidth: 1 },
     { fill: '#C1DD0A', stroke: '#C1DD0A', strokeWidth: 1 },
     { fill: '#C1DD0A', stroke: '#C1DD0A', strokeWidth: 1 },
-    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
-    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
-    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
-    { fill: '#C8C8C8', stroke: '#C8C8C8', strokeWidth: 1 },
+    { fill: '#CAC3C3', stroke: '#CAC3C3', strokeWidth: 1 },
+    { fill: '#DC9995', stroke: '#DC9995', strokeWidth: 1 },
+    { fill: '#EF625A', stroke: '#EF625A', strokeWidth: 1 },
+    { fill: '#F83C33', stroke: '#F83C33', strokeWidth: 1 },
     { fill: '#FF000a', stroke: '#FF000a', strokeWidth: 1 },
     { fill: '#FF000a', stroke: '#FF000a', strokeWidth: 1 },
     { fill: '#FF000a', stroke: '#FF000a', strokeWidth: 1 },

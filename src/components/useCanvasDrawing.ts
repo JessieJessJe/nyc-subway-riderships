@@ -138,8 +138,8 @@ export const useCanvasDrawing = (
             ctx.fillStyle = fillGradient;
             ctx.fill();
 
-            ctx.strokeStyle = "#ff0000";
-            ctx.stroke();
+            // ctx.strokeStyle = "#ff0000";
+            // ctx.stroke();
           } else if (station.total_ridership <= lowerCutoffRidership) {
             radius = maxRadius;
             ctx.beginPath();
@@ -154,16 +154,16 @@ export const useCanvasDrawing = (
               y,
               radius
             );
-            fillGradient.addColorStop(0, "#000000"); // Start color (center)
-            fillGradient.addColorStop(0.9, "#C1DD0A"); // #C1DD0A
+            fillGradient.addColorStop(0, "#FFFFFF"); // Start color (center)
+            fillGradient.addColorStop(0.7, "#C1DD0A"); // #C1DD0A
             fillGradient.addColorStop(1, "#C1DD0A"); // #C1DD0A
 
             // Set the fill style to the radial gradient
             ctx.fillStyle = fillGradient;
             ctx.fill(); // Fill the circle
 
-            ctx.strokeStyle = "#C1DD0A";
-            ctx.stroke();
+            // ctx.strokeStyle = "#C1DD0A";
+            // ctx.stroke();
           } else {
             // Convert to logarithmic scale for radius calculation
             const logMin = Math.log(lowerCutoffRidership);
@@ -177,6 +177,7 @@ export const useCanvasDrawing = (
 
             //soft edges for natural appearance
             gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+
             gradient.addColorStop(
               0,
               getColorForRidership(logNormalizedRidership, 1)
@@ -193,6 +194,8 @@ export const useCanvasDrawing = (
             ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = gradient;
             ctx.fill();
+            ctx.strokeStyle = "#000000";
+            ctx.stroke();
           }
         }
       });

@@ -1,7 +1,7 @@
 // MTAOpenData/front-end/src/components/RidershipHistogram.tsx
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import { logBins, binStyles, tooltipContent } from './utils';
+import { logBins, binStyles, tooltipContent, interpolateRainbowColor } from './utils';
 
 interface RidershipHistogramProps {
     data: { total_ridership: number }[];
@@ -75,10 +75,10 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
 
         gradientMiddle.append('stop')
             .attr('offset', '0%')
-            .attr('stop-color', '#E7E7E7')  // [231, 231, 231]
+            .attr('stop-color', 'rgb(200, 200, 200)');  // Dark color
         gradientMiddle.append('stop')
             .attr('offset', '100%')
-            .attr('stop-color', '#FF000A')  // [255, 0, 10]
+            .attr('stop-color', 'rgb(255, 7, 0)');  // Light color
 
         // Add bars with custom styles
         g.selectAll('.bar')
@@ -92,7 +92,7 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                 return Math.max(0, width - 8);  // Subtract 8px for gap, ensure width isn't negative
             })
             .attr('height', d => innerHeight - y(d.length))
-            .attr('fill', 'black')
+            .attr('fill', 'black')  // Apply gradient to middle bars
             .attr('stroke', 'white')
             .attr('stroke-width', 1);
 
@@ -128,13 +128,14 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             .each(function (d, i) {
                 const g = d3.select(this);
                 const circleId = `circle-gradient-${d}`;
+                const normalizedPosition = (i - 3) / 3;  // 0 to 1 across middle bins
+                const middleColor = interpolateRainbowColor(normalizedPosition);
 
                 // Calculate radius based on bin position
                 let radius;
                 if (i <= 2) {  // First three and last two bins (now 9 total)
                     radius = maxRadius;
                 } else if (i >= 3 && i <= 6) {  // Middle four bins
-                    const normalizedPosition = (i - 3) / 3;  // 0 to 1 across middle bins
                     radius = maxRadius - normalizedPosition * (maxRadius - minRadius);
                 } else {
                     radius = minRadius;
@@ -147,12 +148,13 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                     .attr('cy', '50%')
                     .attr('r', '50%');
 
-                if (i > 2 && i < 7) {  // Start of gradient
-                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#C8C8C8');
-                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#C8C8C8');
-                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#C8C8C8');
+                if (i > 2 && i < 7) {  // Middle four bins
+
+                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', middleColor);
+                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', middleColor);
+                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', middleColor);
                 } else if (i <= 2) {  // First three bins
-                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#000000');
+                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff');
                     radialGradient.append('stop').attr('offset', '90%').attr('stop-color', '#C1DD0A');
                     radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#C1DD0A');
                 } else if (i >= 7) {  // Last two bins
@@ -171,7 +173,7 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                     .attr('stroke', d => {
                         if (i <= 2) return '#C1DD0A';  // First three bins
                         if (i >= 7) return '#FF0000';  // Last two bins
-                        return '#C8C8C8';
+                        return middleColor;
                     })
                     .attr('stroke-width', 1);
             });
