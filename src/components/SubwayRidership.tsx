@@ -113,6 +113,35 @@ const SubwayRidership: React.FC = () => {
 
     }, [currentTime, canvasDimensions, drawOnCanvas]);
 
+    const handleResize = () => {
+        const headerElement = document.querySelector('.header-container');
+        const headerHeight = headerElement?.getBoundingClientRect().height || 0;
+        const isMobile = window.innerWidth < 768; // md breakpoint
+
+        // Calculate histogram dimensions
+        if (isMobile) {
+            const histogramWidth = window.innerWidth;  // Full width without padding
+            const histogramHeight = Math.min(400, window.innerHeight * 0.4); // Cap height at 400px or 40% of viewport height
+            setHistogramDimensions({ width: histogramWidth, height: histogramHeight });
+        } else {
+            // Desktop dimensions
+            setHistogramDimensions({ width: 400, height: 300 });
+        }
+
+        // Calculate canvas dimensions
+        requestAnimationFrame(() => {
+            const width = window.innerWidth;
+            const height = isMobile
+                ? window.innerHeight - headerHeight - histogramDimensions.height
+                : window.innerHeight - headerHeight;
+
+            setCanvasDimensions({ width, height });
+        });
+    };
+
+    // Add this near other state declarations
+    const [histogramDimensions, setHistogramDimensions] = useState<CanvasDimensions>({ width: 0, height: 0 });
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-black">
             <div className="header-container relative  top-0 left-0 w-[100vw] z-10">
@@ -150,22 +179,26 @@ const SubwayRidership: React.FC = () => {
                 </div>
             </div>
 
-            <div className="absolute top-48 left-4 z-20 border border-gray-500 p-4">
-                <RidershipHistogram
-                    data={typedData}
-                    selectedTime={currentTime.hour}
-                    currentData={typedData.filter(
-                        station => station.transit_day === currentTime.day &&
-                            station.transit_hour === currentTime.hour
-                    )}
+            <div className="w-full flex flex-col md:flex-row relative">
+                <div className="w-full md:w-auto md:absolute md:top-48 md:left-4 z-20 border border-gray-500 p-4">
+                    <RidershipHistogram
+                        data={typedData}
+                        selectedTime={currentTime.hour}
+                        currentData={typedData.filter(
+                            station => station.transit_day === currentTime.day &&
+                                station.transit_hour === currentTime.hour
+                        )}
+                    />
+                </div>
+
+                <canvas
+                    ref={canvasRef}
+                    width={canvasDimensions.width}
+                    height={canvasDimensions.height}
+                    className="w-full relative"
                 />
             </div>
-            <canvas
-                ref={canvasRef}
-                width={canvasDimensions.width}
-                height={canvasDimensions.height}
-                className="relative"
-            />
+
             <div
                 id="tooltip"
                 className="absolute bg-white text-black text-xl p-2 rounded shadow-lg hidden"

@@ -335,9 +335,18 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, currentDa
     useEffect(() => {
         const handleResize = debounce(() => {
             if (!containerRef.current) return;
-            const isMobile = window.innerWidth < 768; // Match Tailwind's md breakpoint
-            const height = window.innerHeight * (isMobile ? 0.5 : 0.35);
-            const width = (height * 4) / 3;
+            const containerWidth = containerRef.current.clientWidth;
+            const isMobile = window.innerWidth < 768;
+
+            let width, height;
+            if (isMobile) {
+                width = containerWidth;
+                height = Math.min(400, window.innerHeight * 0.4);
+            } else {
+                height = window.innerHeight * 0.35; // 35vh
+                width = (height * 4) / 3; // maintain 4:3 ratio
+            }
+
             updateChart(width, height);
         }, 250);
 
@@ -345,15 +354,15 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, currentDa
         handleResize();
 
         return () => window.removeEventListener('resize', handleResize);
-    }, [data, currentData]);
+    }, [updateChart]);
 
     // Wrap SVG in a container div and add tooltip
     return (
         <div
             ref={containerRef}
-            className="h-[50vh] md:h-[35vh] aspect-[4/3] relative" // Added relative positioning
+            className="w-full h-[50vh] md:h-[35vh] bg-black"
         >
-            <svg ref={svgRef}></svg>
+            <svg ref={svgRef} className="w-full h-full"></svg>
         </div>
     );
 };
