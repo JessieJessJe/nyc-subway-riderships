@@ -107,8 +107,8 @@ export const useCanvasDrawing = (
             canvasDimensions
           );
 
-          const minRadius = 4;
-          const maxRadius = 8;
+          const minRadius = 3;
+          const maxRadius = 7;
           let brightness: number;
           let radius: number;
           let gradient;
@@ -118,29 +118,6 @@ export const useCanvasDrawing = (
           let lowerCutoffRidership = 19.95;
 
           if (station.total_ridership >= upperCutoffRidership) {
-            radius = minRadius;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-
-            // Create a radial gradient for the fill
-            const fillGradient = ctx.createRadialGradient(
-              x,
-              y,
-              0,
-              x,
-              y,
-              radius
-            );
-            fillGradient.addColorStop(0, "#000000"); // Start color (center)
-            fillGradient.addColorStop(0.8, "#FF0000"); // Start color (center)
-            fillGradient.addColorStop(1, "#FF0000"); // End color (edge)
-            // Set the fill style to a solid color or gradient
-            ctx.fillStyle = fillGradient;
-            ctx.fill();
-
-            // ctx.strokeStyle = "#ff0000";
-            // ctx.stroke();
-          } else if (station.total_ridership <= lowerCutoffRidership) {
             radius = maxRadius;
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
@@ -155,8 +132,31 @@ export const useCanvasDrawing = (
               radius
             );
             fillGradient.addColorStop(0, "#FFFFFF"); // Start color (center)
-            fillGradient.addColorStop(0.7, "#C1DD0A"); // #C1DD0A
-            fillGradient.addColorStop(1, "#C1DD0A"); // #C1DD0A
+            fillGradient.addColorStop(0.8, "#FFFFFF"); // Start color (center)
+            fillGradient.addColorStop(1, "rgba(255, 255, 255, 0)"); // End color (edge)
+            // Set the fill style to a solid color or gradient
+            ctx.fillStyle = fillGradient;
+            ctx.fill();
+
+            // ctx.strokeStyle = "#ff0000";
+            // ctx.stroke();
+          } else if (station.total_ridership <= lowerCutoffRidership) {
+            radius = minRadius;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+
+            // Create a radial gradient for the fill
+            const fillGradient = ctx.createRadialGradient(
+              x,
+              y,
+              0,
+              x,
+              y,
+              radius
+            );
+            fillGradient.addColorStop(0, "#000000"); // Start color (center)
+            fillGradient.addColorStop(0.9, "#8E0485"); // #C1DD0A
+            fillGradient.addColorStop(1, "#8E0485"); // #C1DD0A
 
             // Set the fill style to the radial gradient
             ctx.fillStyle = fillGradient;
@@ -173,7 +173,7 @@ export const useCanvasDrawing = (
               (logValue - logMin) / (logMax - logMin);
 
             radius =
-              maxRadius - logNormalizedRidership * (maxRadius - minRadius);
+              minRadius + logNormalizedRidership * (maxRadius - minRadius);
 
             //soft edges for natural appearance
             gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
@@ -183,19 +183,17 @@ export const useCanvasDrawing = (
               getColorForRidership(logNormalizedRidership, 1)
             );
             gradient.addColorStop(
-              0.9,
+              0.8,
               getColorForRidership(logNormalizedRidership, brightness)
             );
             gradient.addColorStop(
               1,
-              getColorForRidership(logNormalizedRidership, brightness * 0.01)
+              getColorForRidership(logNormalizedRidership, brightness * 0.1)
             );
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
             ctx.fillStyle = gradient;
             ctx.fill();
-            ctx.strokeStyle = "#000000";
-            ctx.stroke();
           }
         }
       });

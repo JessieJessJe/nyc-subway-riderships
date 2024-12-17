@@ -1,19 +1,62 @@
 // MTAOpenData/front-end/src/components/RidershipHistogram.tsx
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import * as d3 from 'd3';
 import { logBins, binStyles, tooltipContent, interpolateRainbowColor } from './utils';
 
+const debounce = (func: Function, wait: number) => {
+    let timeout: NodeJS.Timeout;
+    return function executedFunction(...args: any[]) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
 interface RidershipHistogramProps {
     data: { total_ridership: number }[];
-    width: number;
-    height: number;
     currentData: { total_ridership: number }[];
+    selectedTime: string;
 }
 
-const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, height, currentData }) => {
+const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, currentData, selectedTime }) => {
     const svgRef = useRef<SVGSVGElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
+    // Create tooltip once when component mounts
     useEffect(() => {
+        // Remove any existing tooltips first
+        d3.selectAll('.chart-tooltip').remove();
+
+        // Create the tooltip once
+        const tooltip = d3.select('body')
+            .append('div')
+            .attr('class', `
+                    chart-tooltip
+                    absolute
+                    hidden
+                    bg-gray-100
+                    p-3
+                    rounded-lg
+                    shadow-lg
+                    max-w-[300px]
+                    z-50
+                    text-gray-800
+                    text-sm
+                    leading-relaxed
+                `.trim())
+            .html(tooltipContent);
+
+        // Cleanup on unmount
+        return () => {
+            tooltip.remove();
+        };
+    }, []);
+
+    // Separate the chart update logic
+    const updateChart = useCallback((width: number, height: number) => {
         if (!svgRef.current) return;
 
         // Create ridership buckets for all data
@@ -28,8 +71,13 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             .thresholds(logBins.slice(1, -1))
             (currentData.map(d => d.total_ridership));
 
-        // Add margins for labels
-        const margin = { top: 40, right: 60, bottom: 150, left: 60 };
+        // Add margins for labels with fluid scaling
+        const margin = {
+            top: Math.min(Math.max(20, height * 0.1), 40),     // Scale between 20px and 40px
+            right: Math.min(Math.max(30, width * 0.08), 30),    // Scale between 30px and 60px
+            bottom: Math.min(Math.max(75, height * 0.35), 150),  // Scale between 75px and 150px
+            left: Math.min(Math.max(30, width * 0.08), 30)      // Scale between 30px and 60px
+        };
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
 
@@ -57,7 +105,6 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
         // Calculate the positions for the middle four bars
         const middleBarsStart = x(logBins[3]);  // Start of 4th bin
         const middleBarsEnd = x(logBins[7]);    // End of 7th bin
-        const totalWidth = middleBarsEnd - middleBarsStart;
 
         // Define gradients
         const defs = svg.append('defs');
@@ -80,23 +127,44 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             .attr('offset', '100%')
             .attr('stop-color', 'rgb(255, 7, 0)');  // Light color
 
+
+        // After drawing the main bars, add bars for current selection
+        g.selectAll('.current-bar')
+            .data(currentBuckets)
+            .enter().append('rect')
+            .attr('class', 'current-bar')
+            .attr('x', d => x(d.x0 ?? logBins[0]) + 1.5)
+            .attr('y', d => y(d.length) + 0.5)
+            .attr('width', d => {
+                const width = x(d.x1 ?? logBins[logBins.length - 1]) - x(d.x0 ?? logBins[0]);
+                return Math.max(0.1, width - 9);
+            })
+            .attr('height', d => Math.max(0.1, innerHeight - y(d.length) - 1))
+            .attr('fill', (_, i) => binStyles[i].fill)
+            .attr('stroke', (_, i) => binStyles[i].stroke)
+            .attr('stroke-width', 1)
+            .attr('shape-rendering', 'crispEdges');
+
+
+
         // Add bars with custom styles
         g.selectAll('.bar')
             .data(buckets)
             .enter().append('rect')
             .attr('class', 'bar')
-            .attr('x', d => x(d.x0 ?? logBins[0]))
-            .attr('y', d => y(d.length))
+            .attr('x', d => x(d.x0 ?? logBins[0]) + 1.5)
+            .attr('y', d => y(d.length) + 0.5)
             .attr('width', d => {
                 const width = x(d.x1 ?? logBins[logBins.length - 1]) - x(d.x0 ?? logBins[0]);
-                return Math.max(0, width - 8);  // Subtract 8px for gap, ensure width isn't negative
+                return Math.max(0, width - 9);
             })
-            .attr('height', d => innerHeight - y(d.length))
-            .attr('fill', 'black')  // Apply gradient to middle bars
+            .attr('height', d => Math.max(0.1, innerHeight - y(d.length) - 1))
+            .attr('fill', 'none')
             .attr('stroke', 'white')
-            .attr('stroke-width', 1);
+            .attr('stroke-width', 1)
+            .attr('shape-rendering', 'crispEdges');
 
-        // Add x-axis
+        // Add x-axis with responsive font size
         g.append('g')
             .attr('transform', `translate(0,${innerHeight})`)
             .call(d3.axisBottom(x)
@@ -104,11 +172,10 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                 .tickFormat(d => d.toString())
             )
             .selectAll('text')
-            .attr('fill', d => {
-                return 'white';  // Default color for other labels
-            })
+            .attr('fill', 'white')
             .attr('y', 9)
-            .style('text-anchor', 'middle');
+            .style('text-anchor', 'middle')
+            .style('font-size', `${Math.min(Math.max(12, width * 0.01), 14)}px`);  // Scale between 12-14px
 
         // Calculate bin centers for circle positions
         const binCenters = buckets.map(bucket => {
@@ -117,8 +184,8 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             return Math.sqrt(x0 * x1); // Geometric mean for log scale
         });
 
-        const minRadius = 4;
-        const maxRadius = 8;
+        const minRadius = Math.min(Math.max(3, width * 0.004), 3);
+        const maxRadius = Math.min(Math.max(7, width * 0.008), 7);
 
         // Add circles under bins
         g.selectAll('.bin-circle')
@@ -134,11 +201,11 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                 // Calculate radius based on bin position
                 let radius;
                 if (i <= 2) {  // First three and last two bins (now 9 total)
-                    radius = maxRadius;
-                } else if (i >= 3 && i <= 6) {  // Middle four bins
-                    radius = maxRadius - normalizedPosition * (maxRadius - minRadius);
-                } else {
                     radius = minRadius;
+                } else if (i >= 3 && i <= 6) {  // Middle four bins
+                    radius = minRadius + normalizedPosition * (maxRadius - minRadius);
+                } else {
+                    radius = maxRadius;
                 }
 
                 // Create unique radial gradient for each circle
@@ -154,25 +221,25 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
                     radialGradient.append('stop').attr('offset', '80%').attr('stop-color', middleColor);
                     radialGradient.append('stop').attr('offset', '100%').attr('stop-color', middleColor);
                 } else if (i <= 2) {  // First three bins
-                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff');
-                    radialGradient.append('stop').attr('offset', '90%').attr('stop-color', '#C1DD0A');
-                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#C1DD0A');
-                } else if (i >= 7) {  // Last two bins
                     radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#000000');
-                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#FF0000');
-                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#FF0000');
+                    radialGradient.append('stop').attr('offset', '90%').attr('stop-color', '#8E0485');
+                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#8E0485');
+                } else if (i >= 7) {  // Last two bins
+                    radialGradient.append('stop').attr('offset', '0%').attr('stop-color', '#ffffff');
+                    radialGradient.append('stop').attr('offset', '80%').attr('stop-color', '#ffffff');
+                    radialGradient.append('stop').attr('offset', '100%').attr('stop-color', '#ffffff');
                 }
 
                 // Add the circle with the gradient
                 g.append('circle')
                     .attr('class', 'bin-circle')
                     .attr('cx', x(d))
-                    .attr('cy', innerHeight + 120)
+                    .attr('cy', innerHeight + Math.min(Math.max(90, height * 0.25), 120))  // Scale between 90-120px
                     .attr('r', radius)
                     .attr('fill', `url(#${circleId})`)
                     .attr('stroke', d => {
-                        if (i <= 2) return '#C1DD0A';  // First three bins
-                        if (i >= 7) return '#FF0000';  // Last two bins
+                        if (i <= 2) return '#8E0485';  // First three bins
+                        if (i >= 7) return '#FFFFFF';  // Last two bins
                         return middleColor;
                     })
                     .attr('stroke-width', 1);
@@ -186,8 +253,8 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
             .attr('class', 'tick-line')
             .attr('x1', d => x(d))
             .attr('x2', d => x(d))
-            .attr('y1', innerHeight + 60)
-            .attr('y2', innerHeight + 150)
+            .attr('y1', innerHeight + Math.min(Math.max(45, height * 0.15), 60))       // Scale between 45-60px
+            .attr('y2', innerHeight + Math.min(Math.max(120, height * 0.3), 150))      // Scale between 120-150px
             .attr('stroke', 'white')
             .attr('stroke-width', 1)
             .attr('stroke-dasharray', '4,4');
@@ -195,115 +262,100 @@ const RidershipHistogram: React.FC<RidershipHistogramProps> = ({ data, width, he
         // Add labels above tick lines
         g.selectAll('.tick-label')
             .data([
-                { value: 0, label: "0" },
+                { value: logBins[0], label: "0" },      // Use logBins[0] instead of 0
                 { value: 19.95, label: "20" },
                 { value: 1122.02, label: "1,000" },
-                { value: 20000, label: "20,000" }
+                { value: logBins[logBins.length - 1], label: "20,000" }  // Use last logBin
             ])
             .enter()
             .append('text')
             .attr('class', 'tick-label')
             .attr('x', d => x(d.value))
-            .attr('y', innerHeight + 50)  // Position above the tick line
+            .attr('y', innerHeight + Math.min(Math.max(40, height * 0.12), 50))
             .attr('text-anchor', 'middle')
             .attr('fill', '#EFEFEF')
+            .style('font-size', `${Math.min(Math.max(14, width * 0.012), 16)}px`)  // Scale between 14-16px
             .text(d => d.label);
 
-        // Add y-axis
+        // Add y-axis with responsive font size
         g.append('g')
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y))
+            .selectAll('text')
+            .style('font-size', `${Math.min(Math.max(12, width * 0.01), 14)}px`);  // Scale between 12-14px
 
-        // Add y-axis label
+        // Add y-axis label with responsive font size
         g.append('text')
             .attr('transform', 'rotate(-90)')
             .attr('x', -innerHeight / 2)
-            .attr('y', -40)
+            .attr('y', -margin.left + 12)
             .attr('text-anchor', 'middle')
             .attr('fill', 'white')
+            .style('font-size', `${Math.min(Math.max(14, width * 0.012), 16)}px`)  // Scale between 14-16px
             .text('# of Stations');
 
-        // Add title group
+        // Add title group (fix double transform)
         const titleGroup = g.append('g')
-            .attr('transform', `translate(${innerWidth / 2}, -15)`);
+            .attr('transform', `translate(${innerWidth / 2}, -${margin.top / 2})`);
 
-        // Add main title
+        // Add main title with responsive font size and selected time
         titleGroup.append('text')
             .attr('text-anchor', 'middle')
             .attr('fill', 'white')
-            .text('Distribution of Station Ridership');
+            .style('font-size', `${Math.min(Math.max(16, width * 0.014), 18)}px`)  // Scale between 16-18px
+            .text(`Distribution of Station Ridership (${selectedTime})`);
 
         // Add tooltip icon
         const tooltipIcon = titleGroup.append('text')
-            .attr('x', 250)
+            .attr('x', innerWidth / 2 - 12)
             .attr('y', 0)
             .attr('class', 'tooltip-icon transition-opacity duration-200')
             .attr('fill', 'white')
             .attr('cursor', 'pointer')
-            .text('Info ⓘ')  // Option 1: Filled info symbol
-            // .text('🛈')  // Option 2: Alternative filled info symbol
-            .style('font-size', '16px');
+            .text('Info ⓘ')
+            .style('font-size', `${Math.min(Math.max(14, width * 0.012), 16)}px`);      // Scale between 14-16px
 
-        // Create HTML tooltip div
-        const tooltip = d3.select('body')
-            .append('div')
-            .attr('class', `
-                hidden
-                absolute
-                bg-gray-100
-                p-3
-                rounded-lg
-                shadow-lg
-                max-w-[300px]
-                z-50
-                text-gray-800
-                text-sm
-                leading-relaxed
-            `.trim())
-            .html(tooltipContent);
-
-        // Modify tooltip icon click handler
-        tooltipIcon.on('click', (event) => {
-            const iconPosition = (event.target as SVGElement).getBoundingClientRect();
-
-            if (tooltip.classed('hidden')) {
+        // Modify tooltip icon hover handlers to use Tailwind classes
+        tooltipIcon
+            .on('mouseenter', (event) => {
+                const iconPosition = (event.target as SVGElement).getBoundingClientRect();
+                const tooltip = d3.select('.chart-tooltip');
                 tooltip
                     .classed('hidden', false)
-                    .style('left', `${iconPosition.right + -20}px`)
+                    .style('left', `${iconPosition.right}px`)
                     .style('top', `${iconPosition.top}px`);
-                tooltipIcon.text('✕');  // Change to close icon
-            } else {
-                tooltip.classed('hidden', true);
-                tooltipIcon.text('Info ⓘ');  // Change back to info icon
-            }
-        });
-
-        // Clean up on component unmount
-
-
-        // After drawing the main bars, add bars for current selection
-        g.selectAll('.current-bar')
-            .data(currentBuckets)
-            .enter().append('rect')
-            .attr('class', 'current-bar')
-            .attr('x', d => x(d.x0 ?? logBins[0]))
-            .attr('y', d => y(d.length))
-            .attr('width', d => {
-                const width = x(d.x1 ?? logBins[logBins.length - 1]) - x(d.x0 ?? logBins[0]);
-                return Math.max(0, width - 8);
             })
-            .attr('height', d => innerHeight - y(d.length))
-            .attr('fill', (_, i) => binStyles[i].fill)
-            .attr('stroke', (_, i) => binStyles[i].stroke)
-            .attr('stroke-width', (_, i) => binStyles[i].strokeWidth || 0);
+            .on('mouseleave', () => {
+                d3.select('.chart-tooltip')
+                    .classed('hidden', true);
+            });
 
-        return () => {
-            tooltip.remove();
-        };
+    }, [data, currentData, selectedTime]);
 
+    // Add resize handler
+    useEffect(() => {
+        const handleResize = debounce(() => {
+            if (!containerRef.current) return;
+            const isMobile = window.innerWidth < 768; // Match Tailwind's md breakpoint
+            const height = window.innerHeight * (isMobile ? 0.5 : 0.35);
+            const width = (height * 4) / 3;
+            updateChart(width, height);
+        }, 250);
 
-    }, [data, width, height, currentData]);
+        window.addEventListener('resize', handleResize);
+        handleResize();
 
-    return <svg ref={svgRef}></svg>;
+        return () => window.removeEventListener('resize', handleResize);
+    }, [data, currentData]);
+
+    // Wrap SVG in a container div and add tooltip
+    return (
+        <div
+            ref={containerRef}
+            className="h-[50vh] md:h-[35vh] aspect-[4/3] relative" // Added relative positioning
+        >
+            <svg ref={svgRef}></svg>
+        </div>
+    );
 };
 
 export default RidershipHistogram;

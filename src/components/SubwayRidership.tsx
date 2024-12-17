@@ -42,8 +42,6 @@ const SubwayRidership: React.FC = () => {
 
         const width = window.innerWidth;
         const height = window.innerHeight - headerHeight;
-
-        console.log(headerHeight, 'headerHeight', height, 'height')
         setCanvasDimensions({ width, height });
     };
 
@@ -122,7 +120,7 @@ const SubwayRidership: React.FC = () => {
                     <div className="flex flex-col items-start space-y-2 w-[15vw]">
                         <span className="inline sm:hidden">🗽 🚇</span>
                         <h1 className="hidden sm:block text-white text-lg md:text-2xl lg:text-4xl">
-                            How <b className="text-[#C1DD0A]">Empty</b> is Your Station?
+                            How Busy is Your Subway Station?
                         </h1>
                     </div>
                     <div className="flex-grow text-center w-[70vw]" >
@@ -151,23 +149,23 @@ const SubwayRidership: React.FC = () => {
                     </nav>
                 </div>
             </div>
-            <canvas
-                ref={canvasRef}
-                width={canvasDimensions.width}
-                height={canvasDimensions.height}
-                className="relative"
-            />
+
             <div className="absolute top-48 left-4 z-20 border border-gray-500 p-4">
                 <RidershipHistogram
                     data={typedData}
-                    width={600}
-                    height={400}
+                    selectedTime={currentTime.hour}
                     currentData={typedData.filter(
                         station => station.transit_day === currentTime.day &&
                             station.transit_hour === currentTime.hour
                     )}
                 />
             </div>
+            <canvas
+                ref={canvasRef}
+                width={canvasDimensions.width}
+                height={canvasDimensions.height}
+                className="relative"
+            />
             <div
                 id="tooltip"
                 className="absolute bg-white text-black text-xl p-2 rounded shadow-lg hidden"
