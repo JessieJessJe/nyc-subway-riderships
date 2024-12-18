@@ -177,6 +177,12 @@ const SubwayRidership: React.FC = () => {
                         </a>
                     </nav>
                 </div>
+
+                <div className="sm:hidden w-full text-center px-4 pb-2">
+                    <p className="text-yellow-400 text-sm">
+                        Hey! Thanks for stopping by. This app is made for desktop. Good news – make a wish, maybe it’ll work anyway!
+                    </p>
+                </div>
             </div>
 
             <div className="w-full flex flex-col md:flex-row relative">

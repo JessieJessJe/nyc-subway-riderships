@@ -97,47 +97,51 @@ export const useCanvasDrawing = (
       // Add both mouse and touch event listeners
       const canvas = ctx.canvas;
       canvas.addEventListener("mousemove", handleMouseMove);
-      canvas.addEventListener("touchmove", handleMouseMove);
 
-      let initialScale = 1;
-      let currentScale = 1;
+      let initialDistance = 0;
+      let initialDimensions = { ...canvasDimensions };
 
       const handleTouchStart = (event: TouchEvent) => {
         if (event.touches.length === 2) {
-          // Store initial distance between two fingers
           const touch1 = event.touches[0];
           const touch2 = event.touches[1];
-          initialScale = currentScale;
+          initialDistance = Math.hypot(
+            touch1.clientX - touch2.clientX,
+            touch1.clientY - touch2.clientY
+          );
+          initialDimensions = { ...canvasDimensions };
         }
       };
 
       const handleTouchMove = (event: TouchEvent) => {
         if (event.touches.length === 2) {
-          // Calculate new scale based on finger distance
           const touch1 = event.touches[0];
           const touch2 = event.touches[1];
           const currentDistance = Math.hypot(
             touch1.clientX - touch2.clientX,
             touch1.clientY - touch2.clientY
           );
-          const initialDistance = Math.hypot(
-            touch1.clientX - touch2.clientX,
-            touch1.clientY - touch2.clientY
-          );
 
-          // Calculate new scale
-          const newScale = Math.min(
-            Math.max(initialScale * (currentDistance / initialDistance), 0.5),
+          // Calculate scale factor
+          const scale = Math.min(
+            Math.max(currentDistance / initialDistance, 0.5),
             3
           );
 
-          currentScale = newScale;
+          // Update canvas dimensions based on scale
+          const newWidth = initialDimensions.width * scale;
+          const newHeight = initialDimensions.height * scale;
 
-          // Apply transform to both canvases
-          ctx.canvas.style.transform = `scale(${newScale})`;
+          // Update canvas size
+          ctx.canvas.width = newWidth;
+          ctx.canvas.height = newHeight;
           if (bgCtx) {
-            bgCtx.canvas.style.transform = `scale(${newScale})`;
+            bgCtx.canvas.width = newWidth;
+            bgCtx.canvas.height = newHeight;
           }
+
+          // Redraw with new dimensions
+          drawOnCanvas(ctx, bgCtx, day, hour);
         }
       };
 
