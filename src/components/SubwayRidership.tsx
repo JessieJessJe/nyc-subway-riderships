@@ -144,7 +144,7 @@ const SubwayRidership: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-black">
-            <div className="header-container relative  top-0 left-0 w-[100vw] z-10">
+            <div className="header-container relative sticky top-0 left-0 w-[100vw] z-50 bg-black">
                 <div className="flex justify-between items-start p-4 font-instrument text-left">
                     <div className="flex flex-col items-start space-y-2 w-[15vw]">
                         <span className="inline sm:hidden">🗽 🚇</span>
@@ -201,7 +201,7 @@ const SubwayRidership: React.FC = () => {
 
             <div
                 id="tooltip"
-                className="absolute bg-white text-black text-xl p-2 rounded shadow-lg hidden"
+                className="absolute bg-white text-black text-sm md:text-xl p-2 rounded shadow-lg hidden"
                 style={{ pointerEvents: 'none' }}
                 ref={tooltipRef}
             ></div>

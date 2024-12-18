@@ -48,10 +48,10 @@ export const useCanvasDrawing = (
         bgCtx.fillRect(0, 0, canvasDimensions.width, canvasDimensions.height);
       }
 
-      const handleMouseMove = (event: MouseEvent) => {
+      const handleMouseMove = (event: MouseEvent | TouchEvent) => {
         const rect = ctx.canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
+        const mouseX = (event as MouseEvent).clientX - rect.left;
+        const mouseY = (event as MouseEvent).clientY - rect.top;
 
         let foundStation: StationData | null = null;
         const filteredData = typedData.filter(
@@ -75,8 +75,8 @@ export const useCanvasDrawing = (
 
         const tooltip = tooltipRef.current;
         if (hoveredStation && tooltip) {
-          tooltip.style.left = `${event.clientX + 10}px`;
-          tooltip.style.top = `${event.clientY + 10}px`;
+          tooltip.style.left = `${mouseX + 10}px`;
+          tooltip.style.top = `${mouseY + 10}px`;
           tooltip.innerHTML = `
             <div class="font-bold">${hoveredStation.station_complex}</div>
             <div><span class="text-gray-800">${hoveredStation.transit_day} ${hoveredStation.transit_hour}</span></div>
@@ -94,9 +94,10 @@ export const useCanvasDrawing = (
         }
       };
 
-      // Add mouse move event listener
+      // Add both mouse and touch event listeners
       const canvas = ctx.canvas;
       canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("touchmove", handleMouseMove);
 
       // Draw stations
       typedData.forEach((station: StationData) => {
