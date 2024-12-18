@@ -16,9 +16,3 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
-
-canvas {
-  touch-action: none; /* Prevents default touch behaviors */
-  transform-origin: center center;
-  transition: transform 0.1s ease-out; /* Optional: makes zooming smoother */
-}

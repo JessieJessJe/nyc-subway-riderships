@@ -97,57 +97,6 @@ export const useCanvasDrawing = (
       // Add both mouse and touch event listeners
       const canvas = ctx.canvas;
       canvas.addEventListener("mousemove", handleMouseMove);
-
-      let initialDistance = 0;
-      let initialDimensions = { ...canvasDimensions };
-
-      const handleTouchStart = (event: TouchEvent) => {
-        if (event.touches.length === 2) {
-          const touch1 = event.touches[0];
-          const touch2 = event.touches[1];
-          initialDistance = Math.hypot(
-            touch1.clientX - touch2.clientX,
-            touch1.clientY - touch2.clientY
-          );
-          initialDimensions = { ...canvasDimensions };
-        }
-      };
-
-      const handleTouchMove = (event: TouchEvent) => {
-        if (event.touches.length === 2) {
-          const touch1 = event.touches[0];
-          const touch2 = event.touches[1];
-          const currentDistance = Math.hypot(
-            touch1.clientX - touch2.clientX,
-            touch1.clientY - touch2.clientY
-          );
-
-          // Calculate scale factor
-          const scale = Math.min(
-            Math.max(currentDistance / initialDistance, 0.5),
-            3
-          );
-
-          // Update canvas dimensions based on scale
-          const newWidth = initialDimensions.width * scale;
-          const newHeight = initialDimensions.height * scale;
-
-          // Update canvas size
-          ctx.canvas.width = newWidth;
-          ctx.canvas.height = newHeight;
-          if (bgCtx) {
-            bgCtx.canvas.width = newWidth;
-            bgCtx.canvas.height = newHeight;
-          }
-
-          // Redraw with new dimensions
-          drawOnCanvas(ctx, bgCtx, day, hour);
-        }
-      };
-
-      canvas.addEventListener("touchstart", handleTouchStart);
-      canvas.addEventListener("touchmove", handleTouchMove);
-
       // Draw stations
       typedData.forEach((station: StationData) => {
         if (station.transit_day === day && station.transit_hour === hour) {
@@ -251,8 +200,6 @@ export const useCanvasDrawing = (
       // Update cleanup
       return () => {
         canvas.removeEventListener("mousemove", handleMouseMove);
-        canvas.removeEventListener("touchstart", handleTouchStart);
-        canvas.removeEventListener("touchmove", handleTouchMove);
       };
     },
     [
