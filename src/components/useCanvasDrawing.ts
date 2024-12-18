@@ -99,6 +99,51 @@ export const useCanvasDrawing = (
       canvas.addEventListener("mousemove", handleMouseMove);
       canvas.addEventListener("touchmove", handleMouseMove);
 
+      let initialScale = 1;
+      let currentScale = 1;
+
+      const handleTouchStart = (event: TouchEvent) => {
+        if (event.touches.length === 2) {
+          // Store initial distance between two fingers
+          const touch1 = event.touches[0];
+          const touch2 = event.touches[1];
+          initialScale = currentScale;
+        }
+      };
+
+      const handleTouchMove = (event: TouchEvent) => {
+        if (event.touches.length === 2) {
+          // Calculate new scale based on finger distance
+          const touch1 = event.touches[0];
+          const touch2 = event.touches[1];
+          const currentDistance = Math.hypot(
+            touch1.clientX - touch2.clientX,
+            touch1.clientY - touch2.clientY
+          );
+          const initialDistance = Math.hypot(
+            touch1.clientX - touch2.clientX,
+            touch1.clientY - touch2.clientY
+          );
+
+          // Calculate new scale
+          const newScale = Math.min(
+            Math.max(initialScale * (currentDistance / initialDistance), 0.5),
+            3
+          );
+
+          currentScale = newScale;
+
+          // Apply transform to both canvases
+          ctx.canvas.style.transform = `scale(${newScale})`;
+          if (bgCtx) {
+            bgCtx.canvas.style.transform = `scale(${newScale})`;
+          }
+        }
+      };
+
+      canvas.addEventListener("touchstart", handleTouchStart);
+      canvas.addEventListener("touchmove", handleTouchMove);
+
       // Draw stations
       typedData.forEach((station: StationData) => {
         if (station.transit_day === day && station.transit_hour === hour) {
@@ -199,8 +244,11 @@ export const useCanvasDrawing = (
         }
       });
 
+      // Update cleanup
       return () => {
         canvas.removeEventListener("mousemove", handleMouseMove);
+        canvas.removeEventListener("touchstart", handleTouchStart);
+        canvas.removeEventListener("touchmove", handleTouchMove);
       };
     },
     [
